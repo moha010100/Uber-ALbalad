@@ -1,203 +1,353 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Uber Albalad</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Uber Albalad</title>
+  <style>
+    :root{
+      --yellow:#ffd400;
+      --black:#0b0b0b;
+      --card:#ffffff;
+      --muted:#777;
+      --shadow: 0 6px 18px rgba(10,10,10,0.08);
+      --radius:14px;
+      --gap:24px;
+    }
+    html,body{height:100%;margin:0;font-family: 'Segoe UI', Tahoma, sans-serif;background:#f4f4f4;color:#111}
+    
+    /* ======================= الشريط العلوي ======================= */
+    .topbar{
+      background:var(--yellow);
+      color:var(--black);
+      padding:14px 20px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      position:sticky;
+      top:0;
+      z-index:40;
+      box-shadow:0 2px 6px rgba(0,0,0,0.06)
+    }
+    .topbar .title{
+      font-weight:700;
+      font-size:20px
+    }
+    .topbar .adminBtn{
+      position:absolute;
+      right:20px;
+      background:transparent;
+      border:2px solid rgba(0,0,0,0.08);
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      font-weight:600
+    }
+    .topbar .adminBtn:hover{
+      box-shadow:var(--shadow)
+    }
+    
+    /* ======================= المخطط العام ======================= */
+    .wrap{
+      max-width:1200px;
+      margin:28px auto;
+      padding:0 18px;
+      display:grid;
+      grid-template-columns:1fr 340px;
+      gap:var(--gap)
+    }
 
-<style>
-body {
-  font-family: sans-serif;
-  background: #f3f3f3;
-  margin: 0;
-  padding: 0;
-}
+    /* ======================= الطلبات ======================= */
+    .ordersCard{
+      background:var(--card);
+      padding:22px;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow)
+    }
+    .ordersCard h2{margin:0 0 12px 0;font-size:20px}
+    .ordersList{min-height:160px;display:flex;flex-direction:column;gap:14px}
+    .emptyNotice{color:var(--muted);padding:40px 0;text-align:center;font-size:16px}
 
-/* الشريط العلوي */
-.header {
-  background: #FFD700;
-  padding: 15px;
-  text-align: center;
-  font-size: 26px;
-  font-weight: bold;
-  color: #000;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+    .orderCard{
+      display:flex;gap:14px;align-items:center;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid #f0f0f0;
+      background:#fff
+    }
+    .orderCard img{
+      width:120px;height:80px;object-fit:cover;
+      border-radius:8px;border:1px solid #eee
+    }
+    .orderMeta{flex:1}
+    .orderMeta h4{margin:0 0 6px 0}
+    .orderMeta p{margin:0;color:var(--muted);font-size:13px}
+    .orderActions{display:flex;gap:8px}
 
-/* المحتوى */
-.container {
-  max-width: 1100px;
-  margin: 30px auto;
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  gap: 25px;
-}
+    /* ======================= لوحة المشرف ======================= */
+    .adminCard{
+      background:var(--card);
+      padding:22px;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      display:none;
+      flex-direction:column;
+      gap:12px
+    }
+    .adminCard.active{display:flex}
+    .adminCard h3{margin:0;font-size:18px}
+    .adminInfo{color:var(--muted);font-size:14px}
+    .adminActions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
 
-.orders, .sidebar {
-  background: #fff;
-  padding: 20px;
-  border-radius: 15px;
-  box-shadow: 0 0 5px #ccc;
-}
+    /* ======================= أزرار ======================= */
+    .btn{padding:10px 14px;border-radius:10px;border:none;cursor:pointer;font-weight:600}
+    .btn-primary{background:#ffd400;color:#000}
+    .btn-secondary{background:#f1f1f1;color:#333;border:1px solid #e0e0e0}
+    .btn-danger{background:#e34b3b;color:#fff}
 
-.order-card {
-  background: #fff;
-  padding: 15px;
-  border-radius: 12px;
-  box-shadow: 0 0 4px #ccc;
-  margin-bottom: 15px;
-}
+    /* ======================= نافذة المودال ======================= */
+    .modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.4);
+      z-index:60
+    }
+    .modal.show{display:flex}
+    .modalBox{
+      background:#fff;padding:18px;border-radius:12px;
+      max-width:520px;width:94%;box-shadow:var(--shadow)
+    }
+    .field{margin-bottom:10px}
+    .field input{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e6e6}
 
-.order-img {
-  width: 100%;
-  height: 180px;
-  background: #eee;
-  border-radius: 10px;
-  object-fit: cover;
-}
-
-.btn {
-  padding: 8px 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  border: none;
-}
-
-.btn-blue { background: #1e85e5; color: #fff; }
-.btn-red  { background: #e53935; color: #fff; }
-.btn-gray { background: #eee; }
-
-/* الفورم */
-.modal {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.4);
-  display: none;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal.show { display: flex; }
-
-.modal-box {
-  background: #fff;
-  padding: 20px;
-  width: 100%;
-  max-width: 400px;
-  border-radius: 12px;
-}
-</style>
+    /* ======================= ريسبونسف ======================= */
+    @media(max-width:880px){
+      .wrap{grid-template-columns:1fr;}
+      .topbar .adminBtn{position:static;margin-left:auto}
+    }
+  </style>
 </head>
-
 <body>
 
-<!-- الشريط العلوي -->
-<div class="header">Uber Albalad</div>
-
-<div class="container">
-  
-  <!-- قائمة الطلبات -->
-  <div class="orders">
-    <h2>قائمة الطلبات</h2>
-    <div id="ordersList">لا توجد طلبات حاليا</div>
+  <!-- ======================= الشريط العلوي ======================= -->
+  <div class="topbar">
+    <div class="title">Uber Albalad</div>
+    <button id="openAdminBtn" class="adminBtn">المشرفين</button>
   </div>
 
-  <!-- المشرفين -->
-  <div class="sidebar">
-    <h3>المشرفين</h3>
-    <p>اسم المشرف: مشرف التجربة</p>
-    <p>الكود: 010100</p>
+  <!-- ======================= المحتوى ======================= -->
+  <div class="wrap">
 
-    <button id="addBtn" class="btn btn-blue" style="display:none;" onclick="openForm()">إضافة طلب</button>
-    <button onclick="location.reload()" class="btn btn-gray">إعادة تحميل</button>
+    <!-- الطلبات -->
+    <div class="ordersCard">
+      <h2>قائمة الطلبات</h2>
+      <div id="ordersList" class="ordersList"></div>
+    </div>
 
-    <p style="margin-top:10px;">لا توجد معاملات مالية في هذه الصفحة.</p>
+    <!-- لوحة المشرف -->
+    <div id="adminPanel" class="adminCard">
+      <h3>لوحة المشرف</h3>
+      <div class="adminInfo" id="adminInfo"></div>
+
+      <div class="adminActions" id="adminActions" style="display:none">
+        <button class="btn btn-primary" id="btnAdd">إضافة طلب</button>
+        <button class="btn btn-secondary" id="btnReset">إعادة ضبط</button>
+        <button class="btn btn-danger" id="btnLogout">تسجيل خروج</button>
+        <div class="small">لا توجد معاملات مالية في هذه الصفحة.</div>
+      </div>
+    </div>
+
   </div>
 
-</div>
+  <!-- ======================= نافذة الإضافة ======================= -->
+  <div id="modal" class="modal">
+    <div class="modalBox">
+      <h3 id="modalTitle">إضافة طلب</h3>
 
-<!-- نموذج الإضافة -->
-<div class="modal" id="formModal">
-  <div class="modal-box">
-    <h3>إضافة طلب</h3>
-    <input id="orderName" type="text" placeholder="اسم الطلب" style="width:100%;padding:8px;">
-    <input id="orderImg" type="text" placeholder="رابط الصورة" style="width:100%;padding:8px;margin-top:10px;">
-    
-    <div style="text-align:left;margin-top:15px;">
-      <button class="btn btn-blue" onclick="saveOrder()">حفظ</button>
-      <button class="btn btn-gray" onclick="closeForm()">إلغاء</button>
+      <div class="field">
+        <label>اسم الطلب</label>
+        <input id="inputTitle" type="text" />
+      </div>
+
+      <div class="field">
+        <label>رفع صورة الطلب</label>
+        <input id="inputFile" type="file" accept="image/*" />
+      </div>
+
+      <div style="text-align:left">
+        <button class="btn btn-secondary" onclick="closeModal()">إلغاء</button>
+        <button class="btn btn-primary" id="saveBtn">حفظ</button>
+      </div>
     </div>
   </div>
-</div>
 
 <script>
-let orders = [];
-let loggedAsAdmin = false;
+/* ========= إعدادات ========= */
+const ADMIN_CODE = "010100";
+let isAdmin = sessionStorage.getItem("ua_isAdmin") === "1";
 
-// عند تحميل الموقع — يسأل عن الكود مرة واحدة
-window.onload = () => {
-  let code = prompt("ادخل كود المشرف:");
+/* DOM */
+const adminPanel = document.getElementById("adminPanel");
+const adminInfo = document.getElementById("adminInfo");
+const adminActions = document.getElementById("adminActions");
+const openAdminBtn = document.getElementById("openAdminBtn");
 
-  if (code === "010100") {
-    loggedAsAdmin = true;
-    document.getElementById("addBtn").style.display = "block";
+let orders = JSON.parse(localStorage.getItem("ua_orders") || "[]");
+
+const ordersListEl = document.getElementById("ordersList");
+const modal = document.getElementById("modal");
+const inputTitle = document.getElementById("inputTitle");
+const inputFile = document.getElementById("inputFile");
+const modalTitle = document.getElementById("modalTitle");
+const saveBtn = document.getElementById("saveBtn");
+const btnAdd = document.getElementById("btnAdd");
+const btnReset = document.getElementById("btnReset");
+const btnLogout = document.getElementById("btnLogout");
+
+let editingIndex = -1;
+let tempImageData = "";
+
+/* ========= تحديث واجهة المشرف ========= */
+function updateAdminUI(){
+  if(isAdmin){
+    adminPanel.classList.add("active");
+    adminInfo.innerText = "مرحباً أيها المشرف — يمكنك إدارة الطلبات الآن";
+    adminActions.style.display = "flex";
+    openAdminBtn.innerText = "المشرف";
+  } else {
+    adminPanel.classList.remove("active");
+    adminInfo.innerText = "اضغط على زر المشرفين وأدخل الكود للوصول إلى لوحة التحكم";
+    adminActions.style.display = "none";
+    openAdminBtn.innerText = "المشرفين";
   }
-};
-
-// فتح وإغلاق الفورم
-function openForm() {
-  document.getElementById("formModal").classList.add("show");
 }
 
-function closeForm() {
-  document.getElementById("formModal").classList.remove("show");
-}
-
-// حفظ الطلب
-function saveOrder() {
-  let name = document.getElementById("orderName").value;
-  let img  = document.getElementById("orderImg").value;
-
-  if (!name || !img) {
-    alert("أكمل البيانات!");
+/* ========= عرض الطلبات ========= */
+function renderOrders(){
+  ordersListEl.innerHTML = "";
+  if(orders.length === 0){
+    ordersListEl.innerHTML = `<div class="emptyNotice">لا توجد طلبات حالياً</div>`;
     return;
   }
 
-  orders.push({ name, img });
-  renderOrders();
-  closeForm();
-}
-
-// عرض الطلبات
-function renderOrders() {
-  let list = document.getElementById("ordersList");
-
-  if (orders.length === 0) {
-    list.innerHTML = "لا توجد طلبات حاليا";
-    return;
-  }
-
-  list.innerHTML = "";
-
-  orders.forEach((order, index) => {
-    list.innerHTML += `
-      <div class="order-card">
-        <img src="${order.img}" class="order-img">
-        <h4>${order.name}</h4>
-
-        ${loggedAsAdmin ? `
-        <button class="btn btn-red" onclick="deleteOrder(${index})">حذف</button>
-        ` : ""}
+  orders.forEach((o, i)=>{
+    ordersListEl.innerHTML += `
+      <div class="orderCard">
+        <img src="${o.image}" />
+        <div class="orderMeta">
+          <h4>${o.title}</h4>
+          <p>رقم الديلفري: <b>${o.delivery}</b></p>
+        </div>
+        <div class="orderActions">
+          ${isAdmin ? `
+            <button class="btn btn-secondary" onclick="openEdit(${i})">تعديل</button>
+            <button class="btn btn-danger" onclick="deleteOrder(${i})">حذف</button>
+          ` : ""}
+        </div>
       </div>
     `;
   });
 }
 
-function deleteOrder(i) {
-  if (!loggedAsAdmin) return;
+/* ========= دخول المشرف ========= */
+openAdminBtn.onclick = ()=>{
+  if(isAdmin){
+    adminPanel.classList.toggle("active");
+    return;
+  }
+  const code = prompt("ادخل كود المشرف:");
+  if(code === ADMIN_CODE){
+    isAdmin = true;
+    sessionStorage.setItem("ua_isAdmin","1");
+    updateAdminUI();
+    renderOrders();
+  } else {
+    alert("الكود غير صحيح");
+  }
+};
+
+/* ========= تسجيل خروج ========= */
+btnLogout.onclick = ()=>{
+  if(!confirm("هل تريد تسجيل الخروج؟")) return;
+  isAdmin = false;
+  sessionStorage.removeItem("ua_isAdmin");
+  updateAdminUI();
+  renderOrders();
+  alert("تم تسجيل الخروج بنجاح");
+};
+
+/* ========= إضافة طلب ========= */
+btnAdd.onclick = ()=>{
+  editingIndex = -1;
+  tempImageData = "";
+  inputTitle.value = "";
+  inputFile.value = "";
+  modalTitle.innerText = "إضافة طلب";
+  openModal();
+};
+
+/* ========= رفع صورة ========= */
+inputFile.onchange = e=>{
+  const f = e.target.files[0];
+  if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ()=> tempImageData = reader.result;
+  reader.readAsDataURL(f);
+};
+
+/* ========= حفظ ========= */
+saveBtn.onclick = ()=>{
+  const title = inputTitle.value.trim();
+  if(!title){ alert("اكتب اسم الطلب"); return; }
+
+  if(editingIndex >= 0){
+    if(tempImageData) orders[editingIndex].image = tempImageData;
+    orders[editingIndex].title = title;
+  } else {
+    orders.unshift({
+      title,
+      image: tempImageData || "",
+      delivery: generateDeliveryNumber()
+    });
+  }
+
+  localStorage.setItem("ua_orders", JSON.stringify(orders));
+  closeModal();
+  renderOrders();
+};
+
+/* ========= تعديل ========= */
+function openEdit(i){
+  editingIndex = i;
+  const o = orders[i];
+  modalTitle.innerText = "تعديل الطلب";
+  inputTitle.value = o.title;
+  tempImageData = o.image;
+  openModal();
+}
+
+/* ========= حذف ========= */
+function deleteOrder(i){
+  if(!confirm("حذف الطلب؟")) return;
   orders.splice(i,1);
+  localStorage.setItem("ua_orders", JSON.stringify(orders));
   renderOrders();
 }
+
+/* ========= أدوات ========= */
+function openModal(){ modal.classList.add("show") }
+function closeModal(){ modal.classList.remove("show") }
+
+function generateDeliveryNumber(){
+  return Math.floor(100000 + Math.random()*900000);
+}
+
+/* ========= تحميل أولي ========= */
+updateAdminUI();
+renderOrders();
 </script>
 
 </body>
