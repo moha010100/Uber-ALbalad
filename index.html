@@ -1,4 +1,3 @@
-<!-- صفحة طلبات بسيطة HTML + CSS + JS بدون React -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -16,7 +15,6 @@
     .btn-blue { background: #1e88e5; color: #fff; }
     .btn-red { background: #e53935; color: #fff; }
     .btn-gray { background: #eee; }
-    /* المودال */
     .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; }
     .modal.show { display: flex; }
     .modal-box { background:#fff; padding:20px; width:100%; max-width:400px; border-radius:12px; }
@@ -24,46 +22,38 @@
 </head>
 <body>
 
-<!-- *** إزالة صفحة الترحيب بالكامل *** -->
-
-<!-- صفحة النظام الأساسية -->
-<div id="appPage" style="display:none;">
-
 <div class="container">
-  <!-- الشريط الجانبي -->
   <div class="sidebar">
     <h3>المشرفين</h3>
     <p>اسم المشرف: مشرف التجربة</p>
     <p>الكود: 010100</p>
-    <button class="btn btn-blue" onclick="requestAdminCode()()">إضافة طلب</button>
+    <button class="btn btn-blue" onclick="requestAdminCode()">إضافة طلب</button>
     <button class="btn btn-gray" onclick="resetData()">إعادة ضبط</button>
     <p style="font-size:12px;margin-top:10px;color:#777">لا توجد معاملات مالية في هذه الصفحة.</p>
   </div>
 
-  <!-- قائمة الطلبات -->
   <div class="orders">
     <h2>قائمة الطلبات</h2>
     <div id="ordersList"></div>
   </div>
 </div>
 
-<!-- نافذة إضافة/تعديل الطلب -->
 <div class="modal" id="formModal">
   <div class="modal-box">
     <h3 id="formTitle">إضافة طلب</h3>
 
     <label>اسم الطلب</label>
-    <input id="titleInput" class="input" style="width:100%;padding:8px" />
+    <input id="titleInput" style="width:100%;padding:8px" />
 
     <br><br>
     <label>رقم الديلفري</label>
-    <input id="deliveryInput" class="input" style="width:100%;padding:8px" />
+    <input id="deliveryInput" style="width:100%;padding:8px" />
 
     <br><br>
     <label>صورة الطلب</label>
     <input type="file" accept="image/*" onchange="loadImage(event)" />
 
-    <img id="previewImg" style="width:100%; margin-top:10px; display:none; border-radius:10px" />
+    <img id="previewImg" style="width:100%;margin-top:10px;display:none;border-radius:10px" />
 
     <br><br>
     <button class="btn btn-blue" onclick="saveOrder()">حفظ</button>
@@ -71,15 +61,20 @@
   </div>
 </div>
 
-</div>
-
 <script>
-  /* نظام تسجيل الدخول */
-    }
-
   let orders = JSON.parse(localStorage.getItem("simple_orders_html")) || [];
   let editingId = null;
   let imageData = "";
+
+  function requestAdminCode(action) {
+    const code = prompt("ادخل كود المشرف لإتمام العملية:");
+    if (code === "010100") {
+      if (typeof action === "function") action();
+      else openForm();
+    } else if (code !== null) {
+      alert("الكود غير صحيح");
+    }
+  }
 
   function render() {
     const list = document.getElementById("ordersList");
@@ -96,8 +91,8 @@
           <img class='order-img' src='${o.image || ""}' alt='img' />
           <h3>${o.title}</h3>
           <p>رقم الديلفري: <b>${o.delivery}</b></p>
-          <button class='btn btn-gray' onclick='requestAdminCode(() => editOrder(${o.id})'>تعديل</button>
-          <button class='btn btn-red' onclick='requestAdminCode(() => deleteOrder(${o.id})'>حذف</button>
+          <button class='btn btn-gray' onclick='requestAdminCode(() => editOrder(${o.id}))'>تعديل</button>
+          <button class='btn btn-red' onclick='requestAdminCode(() => deleteOrder(${o.id}))'>حذف</button>
         </div>
       `;
     });
@@ -159,7 +154,10 @@
     document.getElementById("deliveryInput").value = o.delivery;
 
     const preview = document.getElementById("previewImg");
-    if (o.image) { preview.src = o.image; preview.style.display = "block"; }
+    if (o.image) {
+      preview.src = o.image;
+      preview.style.display = "block";
+    }
 
     document.getElementById("formModal").classList.add("show");
   }
@@ -178,16 +176,6 @@
   }
 
   render();
-/* نظام حماية المشرف */
-function requestAdminCode(action){
-  const code = prompt("ادخل كود المشرف لإتمام العملية:");
-  if(code === "010100"){
-    if(typeof action === 'function') action();
-    else openForm();
-  } else if(code !== null){
-    alert("الكود غير صحيح");
-  }
-}
 </script>
 
 </body>
