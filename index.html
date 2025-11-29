@@ -24,13 +24,18 @@
 </head>
 <body>
 
+<!-- *** إزالة صفحة الترحيب بالكامل *** -->
+
+<!-- صفحة النظام الأساسية -->
+<div id="appPage" style="display:none;">
+
 <div class="container">
   <!-- الشريط الجانبي -->
   <div class="sidebar">
     <h3>المشرفين</h3>
     <p>اسم المشرف: مشرف التجربة</p>
     <p>الكود: 010100</p>
-    <button class="btn btn-blue" onclick="openForm()">إضافة طلب</button>
+    <button class="btn btn-blue" onclick="requestAdminCode()()">إضافة طلب</button>
     <button class="btn btn-gray" onclick="resetData()">إعادة ضبط</button>
     <p style="font-size:12px;margin-top:10px;color:#777">لا توجد معاملات مالية في هذه الصفحة.</p>
   </div>
@@ -66,7 +71,12 @@
   </div>
 </div>
 
+</div>
+
 <script>
+  /* نظام تسجيل الدخول */
+    }
+
   let orders = JSON.parse(localStorage.getItem("simple_orders_html")) || [];
   let editingId = null;
   let imageData = "";
@@ -86,8 +96,8 @@
           <img class='order-img' src='${o.image || ""}' alt='img' />
           <h3>${o.title}</h3>
           <p>رقم الديلفري: <b>${o.delivery}</b></p>
-          <button class='btn btn-gray' onclick='editOrder(${o.id})'>تعديل</button>
-          <button class='btn btn-red' onclick='deleteOrder(${o.id})'>حذف</button>
+          <button class='btn btn-gray' onclick='requestAdminCode(() => editOrder(${o.id})'>تعديل</button>
+          <button class='btn btn-red' onclick='requestAdminCode(() => deleteOrder(${o.id})'>حذف</button>
         </div>
       `;
     });
@@ -168,6 +178,16 @@
   }
 
   render();
+/* نظام حماية المشرف */
+function requestAdminCode(action){
+  const code = prompt("ادخل كود المشرف لإتمام العملية:");
+  if(code === "010100"){
+    if(typeof action === 'function') action();
+    else openForm();
+  } else if(code !== null){
+    alert("الكود غير صحيح");
+  }
+}
 </script>
 
 </body>
