@@ -1,281 +1,215 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uber Albalad</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uber Albalad</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-        }
-        .top-bar {
-            background: #FFD000;
-            color: #000;
-            padding: 15px;
-            font-size: 24px;
-            text-align: center;
-            font-weight: bold;
-        }
-        .container {
-            display: flex;
-            justify-content: space-between;
-            padding: 20px;
-            gap: 20px;
-        }
-        .box {
-            width: 48%;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .order-img {
-            width: 50%;
-            border-radius: 6px;
-            margin-top: 10px;
-        }
-        .order-box {
-            margin-bottom: 20px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 15px;
-        }
-        .admin-btn {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: black;
-            color: yellow;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 18px;
-            cursor: pointer;
-        }
-        .popup-bg {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            justify-content: center;
-            align-items: center;
-        }
-        .popup {
-            background: white;
-            width: 350px;
-            padding: 20px;
-            border-radius: 10px;
-        }
-        input, button {
-            width: 100%;
-            padding: 10px;
-            margin: 7px 0;
-            border-radius: 6px;
-            border: 1px solid #aaa;
-        }
-        .btn-red { background: red; color: white; }
-        .btn-blue { background: blue; color: white; }
-        .btn-gray { background: gray; color: white; }
-    </style>
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAbMI7WprkW6WQeXp_XFToSELGnKu49OfQ",
+  authDomain: "uber-albalad.firebaseapp.com",
+  databaseURL: "https://uber-albalad-default-rtdb.firebaseio.com",
+  projectId: "uber-albalad",
+  storageBucket: "uber-albalad.appspot.com",
+  messagingSenderId: "848401880868",
+  appId: "1:848401880868:web:5801175b6991ff1ea005b1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const storage = getStorage(app);
+
+// ------------ Global Variables --------------
+let isAdmin = false;
+const ADMIN_CODE = "010100";
+let editingID = null;
+
+// ------------ Load Orders --------------
+function loadOrders() {
+    const ordersRef = ref(db, "orders");
+    onValue(ordersRef, snapshot => {
+        const container = document.getElementById("ordersList");
+        container.innerHTML = "";
+
+        snapshot.forEach(child => {
+            const data = child.val();
+            const id = child.key;
+
+            let box = document.createElement("div");
+            box.className = "order";
+
+            box.innerHTML = `
+                <img src="${data.image}" class="order-img">
+                <p><b>المنتج:</b> ${data.name}</p>
+                <p><b>السعر:</b> ${data.price} جنيه</p>
+                <p><b>رقم الدليفري:</b> ${data.delivery}</p>
+
+                ${isAdmin ? `
+                <button class="btn-blue" onclick="editOrder('${id}', '${data.name}', '${data.price}', '${data.delivery}', '${data.image}')">تعديل</button>
+                <button class="btn-red" onclick="deleteOrder('${id}')">حذف</button>
+                ` : ""}
+            `;
+
+            container.appendChild(box);
+        });
+    });
+}
+loadOrders();
+
+// ------------ Add Order --------------
+window.saveOrder = async function () {
+    const name = document.getElementById("pname").value;
+    const price = document.getElementById("pprice").value;
+    const delivery = document.getElementById("pdelivery").value;
+    const file = document.getElementById("pimage").files[0];
+
+    if (!name || !price || !delivery) return alert("املأ كل الحقول!");
+
+    let imageURL = "";
+    if (file) {
+        const storageRef = sRef(storage, "orders/" + file.name);
+        await uploadBytes(storageRef, file);
+        imageURL = await getDownloadURL(storageRef);
+    }
+
+    const ordersRef = ref(db, "orders");
+
+    if (!editingID) {
+        push(ordersRef, { name, price, delivery, image: imageURL });
+    } else {
+        update(ref(db, "orders/" + editingID), {
+            name, price, delivery,
+            image: imageURL || document.getElementById("oldImage").value
+        });
+        editingID = null;
+    }
+
+    closePopup();
+};
+
+// ------------ Edit Order --------------
+window.editOrder = function (id, name, price, delivery, image) {
+    editingID = id;
+    document.getElementById("popupTitle").innerText = "تعديل الطلب";
+    document.getElementById("pname").value = name;
+    document.getElementById("pprice").value = price;
+    document.getElementById("pdelivery").value = delivery;
+    document.getElementById("oldImage").value = image;
+    document.getElementById("popup").style.display = "block";
+};
+
+// ------------ Delete Order --------------
+window.deleteOrder = function (id) {
+    if (confirm("هل أنت متأكد من حذف الطلب؟")) {
+        remove(ref(db, "orders/" + id));
+    }
+};
+
+// ------------ Admin Login --------------
+window.loginAdmin = function () {
+    const code = prompt("ادخل كود المشرف:");
+    if (code === ADMIN_CODE) {
+        isAdmin = true;
+        document.getElementById("adminPanel").style.display = "block";
+        loadOrders();
+    } else {
+        alert("الكود غير صحيح");
+    }
+};
+
+// ------------ Logout --------------
+window.logoutAdmin = function () {
+    isAdmin = false;
+    document.getElementById("adminPanel").style.display = "none";
+    loadOrders();
+};
+
+// ------------ Popup --------------
+window.openPopup = function () {
+    editingID = null;
+    document.getElementById("popupTitle").innerText = "إضافة طلب جديد";
+    document.getElementById("pname").value = "";
+    document.getElementById("pprice").value = "";
+    document.getElementById("pdelivery").value = "";
+    document.getElementById("pimage").value = "";
+    document.getElementById("popup").style.display = "block";
+};
+
+window.closePopup = function () {
+    document.getElementById("popup").style.display = "none";
+};
+</script>
+
+<style>
+body { margin:0; font-family:Arial; background:#f3f3f3; }
+.header { background:#ffcc00; padding:15px; text-align:center; font-size:26px; font-weight:bold; }
+.admin-btn { position:absolute; left:20px; top:10px; background:black; color:white; padding:10px 20px; border-radius:6px; cursor:pointer; }
+
+.container { display:grid; grid-template-columns:300px 1fr; gap:20px; padding:20px; }
+.box { background:white; padding:20px; border-radius:10px; box-shadow:0 0 5px #ccc; }
+
+.order { background:white; padding:15px; border-radius:10px; margin-bottom:15px; box-shadow:0 0 5px #ccc; }
+.order-img { width:100%; height:200px; object-fit:cover; border-radius:10px; }
+
+.btn-blue { background:#007bff; padding:8px 12px; color:white; border:none; border-radius:6px; cursor:pointer; }
+.btn-red { background:#d9534f; padding:8px 12px; color:white; border:none; border-radius:6px; cursor:pointer; }
+
+#popup {
+  display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+  background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center;
+}
+.popup-box {
+  background:white; width:400px; padding:20px; border-radius:10px; box-shadow:0 0 10px #222;
+}
+input { width:100%; padding:10px; margin-bottom:10px; border-radius:6px; border:1px solid #ccc; }
+</style>
+
 </head>
-
 <body>
 
-    <div class="top-bar">Uber Albalad</div>
+<div class="header">Uber Albalad</div>
+<button class="admin-btn" onclick="loginAdmin()">المشرفين</button>
 
-    <div id="adminButton" class="admin-btn" onclick="showAdminLogin()">المشرفين</div>
+<div class="container">
 
-    <!-- نافذة تسجيل المشرف -->
-    <div id="adminLogin" class="popup-bg">
-        <div class="popup">
-            <h3>دخول المشرف</h3>
-            <input id="adminCodeInput" type="password" placeholder="ادخل كود المشرف">
-            <button class="btn-blue" onclick="checkAdmin()">دخول</button>
-            <button class="btn-red" onclick="closeAdminLogin()">إلغاء</button>
-        </div>
+    <!-- لوحة المشرف -->
+    <div class="box" id="adminPanel" style="display:none;">
+        <h3>لوحة المشرف</h3>
+        <button class="btn-blue" onclick="openPopup()">إضافة طلب</button>
+        <br><br>
+        <button class="btn-red" onclick="logoutAdmin()">تسجيل خروج</button>
     </div>
 
-    <!-- نافذة إضافة الطلب -->
-    <div id="addPopup" class="popup-bg">
-        <div class="popup">
-            <h3>إضافة طلب جديد</h3>
-            <input id="orderName" placeholder="اسم الطلب">
-            <input id="orderPrice" placeholder="السعر">
-            <input id="orderDelivery" placeholder="رقم الدليفري">
-            <input id="orderImage" type="file" accept="image/*">
-            <button class="btn-blue" onclick="saveOrder()">حفظ</button>
-            <button class="btn-red" onclick="closeAddPopup()">إلغاء</button>
-        </div>
+    <!-- قائمة الطلبات -->
+    <div class="box">
+        <h3>قائمة الطلبات</h3>
+        <div id="ordersList">جاري التحميل…</div>
     </div>
 
-    <!-- نافذة تعديل الطلب -->
-    <div id="editPopup" class="popup-bg">
-        <div class="popup">
-            <h3>تعديل الطلب</h3>
-            <input id="editName">
-            <input id="editPrice">
-            <input id="editDelivery">
-            <input id="editImage" type="file" accept="image/*">
-            <button class="btn-blue" onclick="saveEdit()">حفظ التعديل</button>
-            <button class="btn-red" onclick="closeEditPopup()">إلغاء</button>
-        </div>
-    </div>
+</div>
 
-    <div class="container">
-        <div class="box">
-            <h2>قائمة الطلبات</h2>
-            <div id="orderList">جاري التحميل...</div>
-        </div>
+<!-- Popup -->
+<div id="popup">
+  <div class="popup-box">
+    <h3 id="popupTitle">إضافة طلب جديد</h3>
 
-        <div class="box" id="adminPanel" style="display:none;">
-            <h2>لوحة المشرف</h2>
-            <button class="btn-blue" onclick="openAddPopup()">إضافة طلب</button>
-            <button class="btn-red" onclick="adminLogout()">تسجيل خروج</button>
-        </div>
-    </div>
+    <input id="pname" type="text" placeholder="اسم المنتج">
+    <input id="pprice" type="number" placeholder="السعر">
+    <input id="pdelivery" type="text" placeholder="رقم الدليفري">
 
-    <!-- Firebase -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove, update }
-            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
-            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+    <input id="pimage" type="file" accept="image/*">
+    <input id="oldImage" type="hidden">
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAbMI7WprkW6WQeXp_XFToSELGnKu49OfQ",
-            authDomain: "uber-albalad.firebaseapp.com",
-            databaseURL: "https://uber-albalad-default-rtdb.firebaseio.com",
-            projectId: "uber-albalad",
-            storageBucket: "uber-albalad.firebasestorage.app",
-            messagingSenderId: "848401880868",
-            appId: "1:848401880868:web:5801175b6991ff1ea005b1"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase();
-        const storage = getStorage();
-
-        const ordersRef = ref(db, "orders");
-
-        let isAdmin = false;
-        let editID = null;
-
-        // تحميل الطلبات
-        onValue(ordersRef, snapshot => {
-            let data = snapshot.val();
-            let html = "";
-            if (!data) {
-                document.getElementById("orderList").innerHTML = "لا توجد طلبات";
-                return;
-            }
-            for (let id in data) {
-                let o = data[id];
-                html += `
-                    <div class="order-box">
-                        <h3>${o.name}</h3>
-                        <p>السعر: ${o.price}</p>
-                        <p>الدليفري: ${o.delivery}</p>
-                        <img src="${o.image}" class="order-img">
-
-                        ${isAdmin ? `
-                            <button class="btn-blue" onclick="openEdit('${id}', '${o.name}', '${o.price}', '${o.delivery}', '${o.image}')">تعديل</button>
-                            <button class="btn-red" onclick="deleteOrder('${id}')">حذف</button>
-                        ` : ""}
-                    </div>
-                `;
-            }
-            document.getElementById("orderList").innerHTML = html;
-        });
-
-        // إضافة طلب
-        async function saveOrder() {
-            const name = orderName.value;
-            const price = orderPrice.value;
-            const delivery = orderDelivery.value;
-            const file = orderImage.files[0];
-            if (!name || !price || !delivery || !file) return alert("اكمل البيانات");
-
-            const storagePath = sRef(storage, "orders/" + Date.now() + "_" + file.name);
-            await uploadBytes(storagePath, file);
-            const url = await getDownloadURL(storagePath);
-
-            const newRef = push(ordersRef);
-            set(newRef, { name, price, delivery, image: url });
-
-            closeAddPopup();
-        }
-
-        // فتح نافذة التعديل
-        function openEdit(id, name, price, delivery, image) {
-            editID = id;
-            editName.value = name;
-            editPrice.value = price;
-            editDelivery.value = delivery;
-            document.getElementById("editPopup").style.display = "flex";
-        }
-
-        async function saveEdit() {
-            const name = editName.value;
-            const price = editPrice.value;
-            const delivery = editDelivery.value;
-            let imageUrl = null;
-            const newImage = editImage.files[0];
-
-            if (newImage) {
-                const storagePath = sRef(storage, "orders/" + Date.now());
-                await uploadBytes(storagePath, newImage);
-                imageUrl = await getDownloadURL(storagePath);
-            }
-
-            const updateData = {
-                name,
-                price,
-                delivery
-            };
-
-            if (imageUrl) updateData.image = imageUrl;
-
-            update(ref(db, "orders/" + editID), updateData);
-
-            closeEditPopup();
-        }
-
-        // حذف
-        function deleteOrder(id) {
-            if (confirm("هل أنت متأكد من الحذف؟")) {
-                remove(ref(db, "orders/" + id));
-            }
-        }
-
-        // مشرف
-        const ADMIN_CODE = "010100";
-
-        function showAdminLogin() { adminLogin.style.display = "flex"; }
-        function closeAdminLogin() { adminLogin.style.display = "none"; }
-
-        function checkAdmin() {
-            if (adminCodeInput.value === ADMIN_CODE) {
-                isAdmin = true;
-                adminPanel.style.display = "block";
-                adminLogin.style.display = "none";
-                onValue(ordersRef, () => {}); 
-            } else alert("الكود غير صحيح");
-        }
-
-        function adminLogout() {
-            isAdmin = false;
-            adminPanel.style.display = "none";
-            onValue(ordersRef, () => {});
-        }
-
-        function openAddPopup() { addPopup.style.display = "flex"; }
-        function closeAddPopup() { addPopup.style.display = "none"; }
-        function closeEditPopup() { editPopup.style.display = "none"; }
-
-    </script>
+    <button class="btn-blue" onclick="saveOrder()">حفظ</button>
+    <button class="btn-red" onclick="closePopup()">إلغاء</button>
+  </div>
+</div>
 
 </body>
 </html>
