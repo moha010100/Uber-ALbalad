@@ -7,103 +7,141 @@
 
 <style>
     body {
-        font-family: sans-serif;
+        font-family: "Tahoma", sans-serif;
         margin: 0;
         padding: 0;
-        background: #f5f5f5;
+        background: #f7f7f7;
     }
+
+    /* الشريط العلوي */
     .topbar {
-        background: #ffcc00;
-        padding: 15px;
-        text-align: center;
+        background: #ffffff;
+        padding: 18px 25px;
         font-size: 26px;
         font-weight: bold;
         color: black;
-        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 0;
+        z-index: 10;
     }
-    #adminBtn {
-        position: absolute;
-        left: 20px;
-        top: 10px;
+
+    #adminBtn, #logoutBtn {
         background: black;
         color: white;
-        padding: 8px 15px;
+        padding: 8px 18px;
         border-radius: 8px;
         cursor: pointer;
         border: none;
+        font-size: 15px;
     }
+
+    /* الحاوية الرئيسية */
     .container {
         padding: 25px;
         display: grid;
         grid-template-columns: 70% 30%;
         gap: 20px;
     }
+
+    /* صندوق */
     .box {
         background: white;
-        border-radius: 12px;
+        border-radius: 14px;
         padding: 20px;
-        box-shadow: 0 0 8px #ccc;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
+
+    /* GRID للطلبات */
+    .orders-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+
+    /* كروت الطلبات */
     .order-card {
-        padding: 15px;
+        background: #fff;
         border-radius: 12px;
-        background: #eee;
-        margin-bottom: 15px;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        overflow: hidden;
+        transition: 0.2s;
     }
+    .order-card:hover {
+        transform: translateY(-3px);
+    }
+
     .order-img {
         width: 100%;
-        border-radius: 12px;
-        height: 200px;
+        height: 170px;
         object-fit: cover;
     }
+
+    .order-info {
+        padding: 12px 15px;
+    }
+
     .btn {
-        padding: 8px 14px;
+        padding: 7px 14px;
         border: none;
         border-radius: 6px;
         cursor: pointer;
+        font-size: 14px;
     }
-    .btn-blue { background: #1e88e5; color: white; }
+    .btn-blue { background: #0066ff; color: white; }
     .btn-red { background: #e53935; color: white; }
-    .hidden { display: none; }
 
+    /* نافذة الإضافة */
     .modal {
         position: fixed;
         inset: 0;
-        background: rgba(0,0,0,0.4);
+        background: rgba(0,0,0,0.45);
         display: none;
         align-items: center;
         justify-content: center;
+        z-index: 20;
     }
     .modal.show { display: flex; }
+
     .modal-box {
         background: white;
         padding: 25px;
-        border-radius: 12px;
+        border-radius: 14px;
         width: 100%;
-        max-width: 420px;
+        max-width: 430px;
     }
+
 </style>
 </head>
 
 <body>
 
+<!-- الشريط العلوي -->
 <div class="topbar">
     Uber Albalad
     <button id="adminBtn">المشرفين</button>
+    <button id="logoutBtn" class="hidden">تسجيل خروج</button>
 </div>
 
 <div class="container">
+
+    <!-- الطلبات -->
     <div class="box">
         <h2>قائمة الطلبات</h2>
-        <div id="ordersList">جاري التحميل...</div>
+        <div id="ordersList" class="orders-grid">جاري التحميل...</div>
     </div>
 
+    <!-- لوحة المشرف -->
     <div class="box hidden" id="adminPanel">
         <h2>لوحة المشرف</h2>
         <button class="btn btn-blue" onclick="openAddModal()">إضافة طلب</button>
     </div>
 </div>
 
+<!-- نافذة إضافة طلب -->
 <div class="modal" id="addModal">
     <div class="modal-box">
         <h3>إضافة طلب جديد</h3>
@@ -118,6 +156,8 @@
 </div>
 
 <script type="module">
+
+    /* Firebase */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -135,40 +175,52 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";  // ← API KEY الجديد
+    /* IMGBB KEY */
+    const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";
 
     let isAdmin = false;
 
-    document.getElementById("adminBtn").onclick = function () {
+    /* تسجيل الدخول */
+    document.getElementById("adminBtn").onclick = () => {
         const code = prompt("ادخل كود المشرف:");
         if (code === "010100") {
             isAdmin = true;
             document.getElementById("adminPanel").classList.remove("hidden");
+            document.getElementById("logoutBtn").classList.remove("hidden");
             alert("تم تسجيل دخول المشرف");
         } else {
             alert("الكود غير صحيح");
         }
     };
 
-    function openAddModal() { document.getElementById("addModal").classList.add("show"); }
-    function closeAddModal() { document.getElementById("addModal").classList.remove("show"); }
+    /* تسجيل الخروج */
+    document.getElementById("logoutBtn").onclick = () => {
+        isAdmin = false;
+        document.getElementById("adminPanel").classList.add("hidden");
+        document.getElementById("logoutBtn").classList.add("hidden");
+        alert("تم تسجيل الخروج");
+    };
 
+    function openAddModal() { addModal.classList.add("show"); }
+    function closeAddModal() { addModal.classList.remove("show"); }
     window.openAddModal = openAddModal;
     window.closeAddModal = closeAddModal;
 
+    /* رفع الصورة لـ ImgBB */
     async function uploadImage(file) {
         const form = new FormData();
         form.append("image", file);
 
-        const res = await fetch(
-            `https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`,
-            { method: "POST", body: form }
-        );
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+            method: "POST",
+            body: form
+        });
 
         const data = await res.json();
         return data.data.url;
     }
 
+    /* حفظ الطلب */
     async function saveOrder() {
         const name = itemName.value;
         const delivery = itemDelivery.value;
@@ -181,23 +233,20 @@
 
         const imageURL = await uploadImage(file);
 
-        push(ref(db, "orders"), {
-            name,
-            delivery,
-            image: imageURL
-        });
+        push(ref(db, "orders"), { name, delivery, image: imageURL });
 
         closeAddModal();
     }
 
     window.saveOrder = saveOrder;
 
-    onValue(ref(db, "orders"), function (snapshot) {
+    /* تحميل الطلبات */
+    onValue(ref(db, "orders"), snapshot => {
         const data = snapshot.val();
         const list = document.getElementById("ordersList");
 
         if (!data) {
-            list.innerHTML = "لا توجد طلبات حاليا";
+            list.innerHTML = "<p>لا توجد طلبات حاليا</p>";
             return;
         }
 
@@ -208,19 +257,21 @@
             div.className = "order-card";
 
             div.innerHTML = `
-                <img class='order-img' src='${item.image}' />
-                <h3>${item.name}</h3>
-                <p>الديلفري: ${item.delivery}</p>
-                ${isAdmin ? `<button class="btn btn-red" onclick="deleteOrder('${id}')">حذف</button>` : ""}
+                <img class="order-img" src="${item.image}">
+                <div class="order-info">
+                    <h3>${item.name}</h3>
+                    <p>الديلفري: ${item.delivery}</p>
+                    ${isAdmin ? `<button class="btn btn-red" onclick="deleteOrder('${id}')">حذف</button>` : ""}
+                </div>
             `;
 
             list.appendChild(div);
         });
     });
 
-    window.deleteOrder = function (id) {
-        remove(ref(db, "orders/" + id));
-    };
+    /* حذف الطلب */
+    window.deleteOrder = id => remove(ref(db, "orders/" + id));
+
 </script>
 
 </body>
