@@ -64,7 +64,6 @@
     }
     .btn-blue { background: #1e88e5; color: white; }
     .btn-red { background: #e53935; color: white; }
-    .btn-gray { background: #777; color: white; }
     .hidden { display: none; }
 
     .modal {
@@ -102,7 +101,6 @@
     <div class="box hidden" id="adminPanel">
         <h2>لوحة المشرف</h2>
         <button class="btn btn-blue" onclick="openAddModal()">إضافة طلب</button>
-        <button class="btn btn-gray" onclick="logoutAdmin()">تسجيل خروج</button>
     </div>
 </div>
 
@@ -137,8 +135,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // API KEY الخاص برفع الصور عبر ImgBB
-    const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";
+    const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";  // ← API KEY الجديد
 
     let isAdmin = false;
 
@@ -194,13 +191,6 @@
     }
 
     window.saveOrder = saveOrder;
-
-    // ⭐ دالة تسجيل خروج
-    window.logoutAdmin = function () {
-        isAdmin = false;
-        document.getElementById("adminPanel").classList.add("hidden");
-        alert("تم تسجيل الخروج");
-    };
 
     onValue(ref(db, "orders"), function (snapshot) {
         const data = snapshot.val();
