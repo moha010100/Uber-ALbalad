@@ -1,162 +1,147 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Uber Albalad</title>
 
-    <!-- ====== CSS ======= -->
     <style>
         body {
             margin: 0;
-            background: #f5f5f5;
             font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        /* الشريط العلوي */
+        .top-bar {
+            background: #FFD000;
+            color: #000;
+            padding: 15px;
+            font-size: 24px;
+            text-align: center;
+            font-weight: bold;
         }
 
-        /* ===== شريط علوي ===== */
-        .navbar {
-            background: #ffd500;
-            padding: 15px 25px;
-            font-size: 24px;
-            font-weight: bold;
-            color: #000;
+        /* الحاويات */
+        .container {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-        .admin-btn {
-            background: #000;
-            color: #ffd500;
-            padding: 8px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
-        /* ===== الحاويات ===== */
-        .container {
-            width: 92%;
-            margin: auto;
-            margin-top: 20px;
-            display: flex;
+            padding: 20px;
             gap: 20px;
         }
 
-        /* ===== الطلبات ===== */
-        .orders-box {
-            width: 70%;
-            background: #fff;
+        .box {
+            width: 48%;
+            background: white;
             padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .order-card {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            background: #f0f0f0;
-            padding: 12px;
-            border-radius: 12px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
 
         .order-img {
-            width: 180px;
-            height: 180px;
-            object-fit: cover;
-            border-radius: 12px;
-            background: #ddd;
-        }
-
-        /* ===== لوحة المشرف ===== */
-        .admin-panel {
-            width: 30%;
-            background: #fff;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0px 4px 10px rgba(0,0,0,0.15);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* ===== نافذة إضافة الطلب ===== */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-box {
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-            border: 1px solid #aaa;
-        }
-        .btn {
-            padding: 10px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
+            width: 50%;
+            border-radius: 6px;
             margin-top: 10px;
         }
-        .btn-blue { background: #007bff; color: #fff; }
-        .btn-red { background: red; color: #fff; }
+
+        .order-box {
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 15px;
+        }
+
+        /* زر المشرف */
+        .admin-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: black;
+            color: yellow;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        /* نافذة الإضافة */
+        .popup-bg {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .popup {
+            background: white;
+            width: 350px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 7px 0;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+        }
+
+        .btn-red { background: red; color: white; }
+        .btn-blue { background: blue; color: white; }
     </style>
 </head>
 
 <body>
 
-    <!-- شريط الموقع -->
-    <div class="navbar">
-        Uber Albalad
-        <div class="admin-btn" id="adminOpen">المشرفين</div>
-    </div>
+    <div class="top-bar">Uber Albalad</div>
 
-    <!-- الحاوية الأساسية -->
-    <div class="container">
-        <div class="orders-box">
-            <h2>قائمة الطلبات</h2>
-            <div id="ordersList">جاري التحميل...</div>
-        </div>
+    <!-- زر المشرف -->
+    <div id="adminButton" class="admin-btn" onclick="showAdminLogin()">المشرفين</div>
 
-        <div class="admin-panel hidden" id="adminPanel">
-            <h3>لوحة المشرف</h3>
-
-            <button class="btn btn-blue" id="addOrder">إضافة طلب</button>
-            <button class="btn btn-red" id="logout">تسجيل خروج</button>
+    <!-- نافذة تسجيل كود المشرف -->
+    <div id="adminLogin" class="popup-bg">
+        <div class="popup">
+            <h3>دخول المشرف</h3>
+            <input id="adminCodeInput" type="password" placeholder="ادخل كود المشرف">
+            <button class="btn-blue" onclick="checkAdmin()">دخول</button>
+            <button class="btn-red" onclick="closeAdminLogin()">إلغاء</button>
         </div>
     </div>
 
     <!-- نافذة إضافة الطلب -->
-    <div class="modal" id="orderModal">
-        <div class="modal-box">
+    <div id="addPopup" class="popup-bg">
+        <div class="popup">
             <h3>إضافة طلب جديد</h3>
-            <input type="text" id="orderName" placeholder="اسم الطلب">
-            <input type="text" id="deliveryNum" placeholder="رقم الديلفري">
-            <input type="file" id="orderImg">
-            <button class="btn btn-blue" id="saveOrder">حفظ</button>
-            <button class="btn btn-red" id="closeModal">إلغاء</button>
+            <input id="orderName" placeholder="اسم الطلب">
+            <input id="orderPrice" placeholder="السعر">
+            <input id="orderDelivery" placeholder="رقم الدليفري">
+            <input id="orderImage" type="file" accept="image/*">
+            <button class="btn-blue" onclick="saveOrder()">حفظ</button>
+            <button class="btn-red" onclick="closeAddPopup()">إلغاء</button>
         </div>
     </div>
 
-    <!-- ============ Firebase + JavaScript ============= -->
-    <script type="module">
+    <div class="container">
+        <div class="box">
+            <h2>قائمة الطلبات</h2>
+            <div id="orderList">جاري التحميل...</div>
+        </div>
 
-        /*================ Firebase Setup ================*/
+        <div class="box" id="adminPanel" style="display:none;">
+            <h2>لوحة المشرف</h2>
+            <button class="btn-blue" onclick="openAddPopup()">إضافة طلب</button>
+            <button class="btn-red" onclick="adminLogout()">تسجيل خروج</button>
+        </div>
+    </div>
+
+    <!-- Firebase CDN -->
+    <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
+        import { getDatabase, ref, push, set, onValue, remove } 
+            from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
             from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
@@ -170,100 +155,78 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const storage = getStorage(app);
+        const db = getDatabase();
+        const storage = getStorage();
 
-        /*================= UI Elements =================*/
-        const adminPanel = document.getElementById("adminPanel");
-        const adminOpen = document.getElementById("adminOpen");
-        const logoutBtn = document.getElementById("logout");
+        const ordersRef = ref(db, "orders");
 
-        const modal = document.getElementById("orderModal");
-        const addOrderBtn = document.getElementById("addOrder");
-        const closeModal = document.getElementById("closeModal");
-        const saveOrder = document.getElementById("saveOrder");
-
-        /*================= Admin Login =================*/
-        adminOpen.onclick = function () {
-            let code = prompt("ادخل كود المشرف:");
-            if (code === "010100") {
-                sessionStorage.setItem("admin", "true");
-                adminPanel.classList.remove("hidden");
-                alert("تم تسجيل الدخول.");
-            } else {
-                alert("كود خاطئ!");
-            }
-        };
-
-        if (sessionStorage.getItem("admin") === "true") {
-            adminPanel.classList.remove("hidden");
-        }
-
-        logoutBtn.onclick = function () {
-            sessionStorage.removeItem("admin");
-            adminPanel.classList.add("hidden");
-            alert("تم تسجيل الخروج");
-        };
-
-        /*================= Show Add Modal =================*/
-        addOrderBtn.onclick = () => modal.style.display = "flex";
-        closeModal.onclick = () => modal.style.display = "none";
-
-        /*================= Save Order =================*/
-        saveOrder.onclick = async function () {
-
-            let name = document.getElementById("orderName").value;
-            let delivery = document.getElementById("deliveryNum").value;
-            let file = document.getElementById("orderImg").files[0];
-
-            if (!name || !delivery || !file) {
-                alert("ادخل جميع البيانات!");
-                return;
-            }
-
-            // رفع الصورة
-            const imgRef = sRef(storage, "orders/" + Date.now());
-            await uploadBytes(imgRef, file);
-            let imageURL = await getDownloadURL(imgRef);
-
-            // حفظ الطلب
-            push(ref(db, "orders"), {
-                name,
-                delivery,
-                image: imageURL
-            });
-
-            modal.style.display = "none";
-            alert("تم حفظ الطلب!");
-        };
-
-        /*================= Load Orders Real Time =================*/
-        const ordersList = document.getElementById("ordersList");
-
-        onValue(ref(db, "orders"), snapshot => {
-            if (!snapshot.exists()) {
-                ordersList.innerHTML = "لا توجد طلبات حاليا";
-                return;
-            }
-
+        // تحميل الطلبات للزوار مباشرة
+        onValue(ordersRef, snapshot => {
+            let data = snapshot.val();
             let html = "";
-            snapshot.forEach(order => {
-                let data = order.val();
-
+            if (!data) {
+                document.getElementById("orderList").innerHTML = "لا توجد طلبات";
+                return;
+            }
+            for (let id in data) {
+                let o = data[id];
                 html += `
-                    <div class="order-card">
-                        <img class="order-img" src="${data.image}">
-                        <div>
-                            <h3>${data.name}</h3>
-                            <p>الدليفري: ${data.delivery}</p>
-                        </div>
+                    <div class="order-box">
+                        <h3>${o.name}</h3>
+                        <p>السعر: ${o.price}</p>
+                        <p>الدليفري: ${o.delivery}</p>
+                        <img src="${o.image}" class="order-img">
                     </div>
                 `;
-            });
-
-            ordersList.innerHTML = html;
+            }
+            document.getElementById("orderList").innerHTML = html;
         });
 
+
+        // إضافة طلب
+        async function saveOrder() {
+            const name = document.getElementById("orderName").value;
+            const price = document.getElementById("orderPrice").value;
+            const delivery = document.getElementById("orderDelivery").value;
+            const file = document.getElementById("orderImage").files[0];
+
+            if (!name || !price || !delivery || !file) return alert("اكمل البيانات");
+
+            const storagePath = sRef(storage, "orders/" + Date.now() + "_" + file.name);
+            await uploadBytes(storagePath, file);
+            const url = await getDownloadURL(storagePath);
+
+            const newOrder = push(ordersRef);
+            set(newOrder, {
+                name,
+                price,
+                delivery,
+                image: url
+            });
+
+            closeAddPopup();
+        }
+
+        // مشرف
+        const ADMIN_CODE = "12345";
+
+        function showAdminLogin() { document.getElementById("adminLogin").style.display = "flex"; }
+        function closeAdminLogin() { document.getElementById("adminLogin").style.display = "none"; }
+
+        function checkAdmin() {
+            let code = document.getElementById("adminCodeInput").value;
+            if (code === ADMIN_CODE) {
+                document.getElementById("adminPanel").style.display = "block";
+                closeAdminLogin();
+            } else alert("الكود غير صحيح");
+        }
+
+        function adminLogout() {
+            document.getElementById("adminPanel").style.display = "none";
+        }
+
+        function openAddPopup() { document.getElementById("addPopup").style.display = "flex"; }
+        function closeAddPopup() { document.getElementById("addPopup").style.display = "none"; }
     </script>
 
 </body>
