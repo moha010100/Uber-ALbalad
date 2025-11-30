@@ -39,11 +39,11 @@
         font-size: 15px;
     }
 
-    /* الحاوية الرئيسية */
+    /* الحاوية */
     .container {
         padding: 25px;
         display: grid;
-        grid-template-columns: 70% 30%;
+        grid-template-columns: 75% 25%;
         gap: 20px;
     }
 
@@ -55,28 +55,29 @@
         box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     }
 
-    /* GRID للطلبات */
+    /* عرض الطلبات كعمود واحد */
     .orders-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
     }
 
-    /* كروت الطلبات */
+    /* كارت الطلب */
     .order-card {
         background: #fff;
-        border-radius: 12px;
+        border-radius: 14px;
         box-shadow: 0 3px 12px rgba(0,0,0,0.08);
         overflow: hidden;
         transition: 0.2s;
     }
+
     .order-card:hover {
         transform: translateY(-3px);
     }
 
     .order-img {
         width: 100%;
-        height: 170px;
+        height: 260px;
         object-fit: cover;
     }
 
@@ -93,6 +94,8 @@
     }
     .btn-blue { background: #0066ff; color: white; }
     .btn-red { background: #e53935; color: white; }
+
+    .hidden { display: none; }
 
     /* نافذة الإضافة */
     .modal {
@@ -114,12 +117,17 @@
         max-width: 430px;
     }
 
+    /* موبايل */
+    @media (max-width: 850px) {
+        .container {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 </head>
 
 <body>
 
-<!-- الشريط العلوي -->
 <div class="topbar">
     Uber Albalad
     <button id="adminBtn">المشرفين</button>
@@ -128,20 +136,18 @@
 
 <div class="container">
 
-    <!-- الطلبات -->
     <div class="box">
         <h2>قائمة الطلبات</h2>
         <div id="ordersList" class="orders-grid">جاري التحميل...</div>
     </div>
 
-    <!-- لوحة المشرف -->
     <div class="box hidden" id="adminPanel">
         <h2>لوحة المشرف</h2>
         <button class="btn btn-blue" onclick="openAddModal()">إضافة طلب</button>
     </div>
 </div>
 
-<!-- نافذة إضافة طلب -->
+<!-- نافذة الإضافة -->
 <div class="modal" id="addModal">
     <div class="modal-box">
         <h3>إضافة طلب جديد</h3>
@@ -157,7 +163,6 @@
 
 <script type="module">
 
-    /* Firebase */
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove } 
         from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
@@ -175,18 +180,17 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    /* IMGBB KEY */
     const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";
 
     let isAdmin = false;
 
     /* تسجيل الدخول */
-    document.getElementById("adminBtn").onclick = () => {
+    adminBtn.onclick = () => {
         const code = prompt("ادخل كود المشرف:");
         if (code === "010100") {
             isAdmin = true;
-            document.getElementById("adminPanel").classList.remove("hidden");
-            document.getElementById("logoutBtn").classList.remove("hidden");
+            adminPanel.classList.remove("hidden");
+            logoutBtn.classList.remove("hidden");
             alert("تم تسجيل دخول المشرف");
         } else {
             alert("الكود غير صحيح");
@@ -194,10 +198,10 @@
     };
 
     /* تسجيل الخروج */
-    document.getElementById("logoutBtn").onclick = () => {
+    logoutBtn.onclick = () => {
         isAdmin = false;
-        document.getElementById("adminPanel").classList.add("hidden");
-        document.getElementById("logoutBtn").classList.add("hidden");
+        adminPanel.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
         alert("تم تسجيل الخروج");
     };
 
@@ -206,16 +210,14 @@
     window.openAddModal = openAddModal;
     window.closeAddModal = closeAddModal;
 
-    /* رفع الصورة لـ ImgBB */
+    /* رفع الصورة إلى ImgBB */
     async function uploadImage(file) {
         const form = new FormData();
         form.append("image", file);
-
         const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
             method: "POST",
             body: form
         });
-
         const data = await res.json();
         return data.data.url;
     }
@@ -233,11 +235,12 @@
 
         const imageURL = await uploadImage(file);
 
-        push(ref(db, "orders"), { name, delivery, image: imageURL });
+        push(ref(db, "orders"), {
+            name, delivery, image: imageURL
+        });
 
         closeAddModal();
     }
-
     window.saveOrder = saveOrder;
 
     /* تحميل الطلبات */
@@ -253,7 +256,7 @@
         list.innerHTML = "";
 
         Object.entries(data).forEach(([id, item]) => {
-            let div = document.createElement("div");
+            const div = document.createElement("div");
             div.className = "order-card";
 
             div.innerHTML = `
@@ -269,7 +272,7 @@
         });
     });
 
-    /* حذف الطلب */
+    /* حذف */
     window.deleteOrder = id => remove(ref(db, "orders/" + id));
 
 </script>
