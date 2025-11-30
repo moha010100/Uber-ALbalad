@@ -1,309 +1,158 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Uber Albalad</title>
-
-<style>
-
+  <meta charset="UTF-8">
+  <title>Simple Orders</title>
+  <style>
     body {
-        font-family: "Tahoma", sans-serif;
-        margin: 0;
-        padding: 0;
-        background: #f5f5f5;
+      font-family: Tahoma, Arial;
+      background: #f6f7fb;
+      margin: 0;
+      padding: 20px;
     }
-
-    /* ===================== التوب بار ======================= */
-    .topbar {
-        background: #ff6a00; /* برتقالي طلبات */
-        padding: 14px 18px;
-        color: white;
-        font-size: 26px;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .logo-box {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .logo {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    #adminBtn, #logoutBtn {
-        background: black;
-        color: white;
-        padding: 8px 15px;
-        border-radius: 8px;
-        cursor: pointer;
-        border: none;
-        font-size: 14px;
-        margin-left: 6px;
-    }
-
-    #logoutBtn.hidden {
-        display: none;
-    }
-
-    /* ===================== الصفحة ======================= */
     .container {
-        padding: 20px;
-        display: grid;
-        grid-template-columns: 25% 75%;
-        gap: 20px;
+      max-width: 750px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
-
-    .box {
-        background: white;
-        padding: 20px;
-        border-radius: 14px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    .logo {
+      width: 120px;
+      margin: auto;
+      display: block;
     }
-
-    /* ===================== الطلبات ======================= */
-    .orders-grid {
-        display: flex;
-        flex-direction: column;
-        gap: 25px;
+    h2 {
+      text-align: center;
+      margin: 10px 0 20px;
     }
-
-    .order-card {
-        border-radius: 12px;
-        background: #fff;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        overflow: hidden;
+    .order {
+      padding: 12px;
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #eee;
     }
-
-    .order-img {
-        width: 100%;
-        height: 240px;
-        object-fit: cover;
+    .order img {
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 8px;
     }
-
-    .order-info {
-        padding: 12px 15px;
+    .admin-panel {
+      display: none;
+      margin-top: 20px;
+      padding: 10px;
+      background: #eef8ff;
+      border-radius: 10px;
     }
-
-    .btn-red {
-        background: #d40000;
-        color: white;
-        padding: 8px 15px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
+    input, button {
+      padding: 8px;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      margin-bottom: 8px;
+      width: 100%;
     }
-
-    .btn-blue {
-        background: #ff6a00;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
+    button {
+      background: #0ea5a4;
+      color: white;
+      cursor: pointer;
     }
-
-    /* ===================== مودال الإضافة ======================= */
-    .modal {
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.5);
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 20;
+    .delete-btn {
+      background: #ff4d4f;
+      margin-top: 5px;
     }
-    .modal.show {
-        display: flex;
-    }
-
-    .modal-box {
-        background: white;
-        padding: 20px;
-        border-radius: 14px;
-        width: 90%;
-        max-width: 420px;
-    }
-
-    /* ===================== موبايل ======================= */
-    @media (max-width: 850px) {
-        .container {
-            grid-template-columns: 1fr;
-        }
-        #adminPanel {
-            order: -1;
-        }
-    }
-
-</style>
+  </style>
 </head>
 
 <body>
 
-<div class="topbar">
-    <div class="logo-box">
-        <img src="A_logo_for_Uber_ElBalad_is_displayed_on_a_white_ba.png" class="logo">
-        Uber Albalad
-    </div>
-    <div>
-        <button id="adminBtn">المشرفين</button>
-        <button id="logoutBtn" class="hidden">تسجيل خروج</button>
-    </div>
-</div>
-
 <div class="container">
+  
+  <img src="logo.png" class="logo" alt="LOGO">
 
-    <!-- لوحة المشرف -->
-    <div class="box hidden" id="adminPanel">
-        <h2>لوحة المشرف</h2>
-        <button class="btn-blue" onclick="openAddModal()">إضافة طلب</button>
-    </div>
+  <h2>عرض الطلبات</h2>
 
-    <!-- قائمة الطلبات -->
-    <div class="box">
-        <h2>قائمة الطلبات</h2>
-        <div id="ordersList" class="orders-grid">جاري التحميل...</div>
-    </div>
+  <button onclick="adminLogin()">دخول المشرف</button>
+
+  <div id="adminPanel" class="admin-panel">
+    <h3>إضافة طلب جديد</h3>
+    <input type="text" id="nameInput" placeholder="اسم الطلب">
+    <input type="text" id="phoneInput" placeholder="رقم الدليفري">
+    <input type="text" id="imgInput" placeholder="رابط الصورة / اسم الصورة">
+    <button onclick="addOrder()">إضافة</button>
+  </div>
+
+  <div id="ordersList"></div>
 
 </div>
 
-<!-- مودال إضافة طلب -->
-<div class="modal" id="addModal">
-    <div class="modal-box">
-        <h3>إضافة طلب جديد</h3>
+<script>
+  let adminCode = "010500";   // ← الكود الجديد اللي انت عاوزه
+  let isAdmin = false;
 
-        <input id="itemName" type="text" placeholder="اسم المنتج" style="width:100%;margin-bottom:10px;">
-        <input id="itemDelivery" type="text" placeholder="رقم الديلفري" style="width:100%;margin-bottom:10px;">
-        <input id="itemImage" type="file" style="margin-bottom:10px;">
+  let orders = [
+    {name:"طلب تجربة", phone:"01012345678", img:"order1.jpg"}
+  ];
 
-        <button class="btn-blue" onclick="saveOrder()">حفظ</button>
-        <button class="btn-red" onclick="closeAddModal()">إلغاء</button>
-    </div>
-</div>
+  function renderOrders() {
+    const list = document.getElementById("ordersList");
+    list.innerHTML = "";
 
-<script type="module">
+    orders.forEach((o, i) => {
+      list.innerHTML += `
+        <div class="order">
+          <img src="${o.img}" alt="">
+          <div><strong>${o.name}</strong></div>
+          <div>رقم الدليفري: ${o.phone}</div>
+          ${
+            isAdmin
+            ? `<button class="delete-btn" onclick="deleteOrder(${i})">حذف</button>`
+            : ``
+          }
+        </div>
+      `;
+    });
+  }
 
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove }
-        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  function adminLogin() {
+    const code = prompt("ادخل كود المشرف:");
+    if (code === adminCode) {
+      isAdmin = true;
+      document.getElementById("adminPanel").style.display = "block";
+      renderOrders();
+      alert("تم تسجيل الدخول كمشرف");
+    } else {
+      alert("كود خاطئ");
+    }
+  }
 
-    const firebaseConfig = {
-        apiKey: "AIzaSyAbMI7WprkW6WQeXp_XFToSELGnKu49OfQ",
-        authDomain: "uber-albalad.firebaseapp.com",
-        databaseURL: "https://uber-albalad-default-rtdb.firebaseio.com",
-        projectId: "uber-albalad",
-        storageBucket: "uber-albalad.appspot.com",
-        messagingSenderId: "848401880868",
-        appId: "1:848401880868:web:5801175b6991ff1ea005b1"
-    };
+  function addOrder() {
+    const name = document.getElementById("nameInput").value.trim();
+    const phone = document.getElementById("phoneInput").value.trim();
+    const img = document.getElementById("imgInput").value.trim();
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";
-
-    let isAdmin = false;
-
-    /* تسجيل دخول المشرف */
-    adminBtn.onclick = () => {
-        const code = prompt("ادخل كود المشرف:");
-        if (code === "010500") {   // ← تعديل الكود هنا
-            isAdmin = true;
-            adminPanel.classList.remove("hidden");
-            logoutBtn.classList.remove("hidden");
-            loadOrders();
-            alert("تم تسجيل دخول المشرف");
-        } else {
-            alert("الكود غير صحيح");
-        }
-    };
-
-    /* تسجيل خروج */
-    logoutBtn.onclick = () => {
-        isAdmin = false;
-        adminPanel.classList.add("hidden");
-        logoutBtn.classList.add("hidden");
-        loadOrders();
-        alert("تم تسجيل الخروج");
-    };
-
-    function openAddModal() { addModal.classList.add("show"); }
-    function closeAddModal() { addModal.classList.remove("show"); }
-
-    async function uploadImage(file) {
-        const form = new FormData();
-        form.append("image", file);
-        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-            method: "POST",
-            body: form
-        });
-        const data = await res.json();
-        return data.data.url;
+    if (!name || !phone || !img) {
+      alert("من فضلك املأ كل البيانات");
+      return;
     }
 
-    async function saveOrder() {
-        const name = itemName.value;
-        const delivery = itemDelivery.value;
-        const file = itemImage.files[0];
+    orders.unshift({name, phone, img});
+    renderOrders();
 
-        if (!name || !delivery || !file) {
-            alert("املأ كل البيانات");
-            return;
-        }
+    document.getElementById("nameInput").value = "";
+    document.getElementById("phoneInput").value = "";
+    document.getElementById("imgInput").value = "";
+  }
 
-        const imageURL = await uploadImage(file);
-
-        push(ref(db, "orders"), {
-            name, delivery, image: imageURL
-        });
-
-        closeAddModal();
+  function deleteOrder(i) {
+    if (confirm("حذف الطلب؟")) {
+      orders.splice(i, 1);
+      renderOrders();
     }
+  }
 
-    /* تحميل الطلبات */
-    function loadOrders() {
-        onValue(ref(db, "orders"), snapshot => {
-            const data = snapshot.val();
-            const list = document.getElementById("ordersList");
-
-            if (!data) {
-                list.innerHTML = "<p>لا توجد طلبات حاليا</p>";
-                return;
-            }
-
-            list.innerHTML = "";
-
-            Object.entries(data).forEach(([id, item]) => {
-                const div = document.createElement("div");
-                div.className = "order-card";
-
-                div.innerHTML = `
-                    <img class="order-img" src="${item.image}">
-                    <div class="order-info">
-                        <h3>${item.name}</h3>
-                        <p>الديلفري: ${item.delivery}</p>
-                        ${isAdmin ? `<button class="btn-red" onclick="deleteOrder('${id}')">حذف</button>` : ""}
-                    </div>
-                `;
-
-                list.appendChild(div);
-            });
-        });
-    }
-
-    loadOrders();
-
-    window.deleteOrder = id => remove(ref(db, "orders/" + id));
-
+  renderOrders();
 </script>
 
 </body>
