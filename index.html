@@ -11,7 +11,6 @@
             font-family: Arial, sans-serif;
             background: #f5f5f5;
         }
-        /* الشريط العلوي */
         .top-bar {
             background: #FFD000;
             color: #000;
@@ -20,15 +19,12 @@
             text-align: center;
             font-weight: bold;
         }
-
-        /* الحاويات */
         .container {
             display: flex;
             justify-content: space-between;
             padding: 20px;
             gap: 20px;
         }
-
         .box {
             width: 48%;
             background: white;
@@ -36,20 +32,16 @@
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-
         .order-img {
             width: 50%;
             border-radius: 6px;
             margin-top: 10px;
         }
-
         .order-box {
             margin-bottom: 20px;
             border-bottom: 1px solid #ddd;
             padding-bottom: 15px;
         }
-
-        /* زر المشرف */
         .admin-btn {
             position: fixed;
             top: 10px;
@@ -61,8 +53,6 @@
             font-size: 18px;
             cursor: pointer;
         }
-
-        /* نافذة الإضافة */
         .popup-bg {
             position: fixed;
             top: 0; left: 0;
@@ -72,14 +62,12 @@
             justify-content: center;
             align-items: center;
         }
-
         .popup {
             background: white;
             width: 350px;
             padding: 20px;
             border-radius: 10px;
         }
-
         input, button {
             width: 100%;
             padding: 10px;
@@ -87,9 +75,9 @@
             border-radius: 6px;
             border: 1px solid #aaa;
         }
-
         .btn-red { background: red; color: white; }
         .btn-blue { background: blue; color: white; }
+        .btn-gray { background: gray; color: white; }
     </style>
 </head>
 
@@ -97,10 +85,9 @@
 
     <div class="top-bar">Uber Albalad</div>
 
-    <!-- زر المشرف -->
     <div id="adminButton" class="admin-btn" onclick="showAdminLogin()">المشرفين</div>
 
-    <!-- نافذة تسجيل كود المشرف -->
+    <!-- نافذة تسجيل المشرف -->
     <div id="adminLogin" class="popup-bg">
         <div class="popup">
             <h3>دخول المشرف</h3>
@@ -123,6 +110,19 @@
         </div>
     </div>
 
+    <!-- نافذة تعديل الطلب -->
+    <div id="editPopup" class="popup-bg">
+        <div class="popup">
+            <h3>تعديل الطلب</h3>
+            <input id="editName">
+            <input id="editPrice">
+            <input id="editDelivery">
+            <input id="editImage" type="file" accept="image/*">
+            <button class="btn-blue" onclick="saveEdit()">حفظ التعديل</button>
+            <button class="btn-red" onclick="closeEditPopup()">إلغاء</button>
+        </div>
+    </div>
+
     <div class="container">
         <div class="box">
             <h2>قائمة الطلبات</h2>
@@ -136,12 +136,12 @@
         </div>
     </div>
 
-    <!-- Firebase CDN -->
+    <!-- Firebase -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, remove } 
+        import { getDatabase, ref, push, set, onValue, remove, update }
             from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } 
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL }
             from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
@@ -160,7 +160,10 @@
 
         const ordersRef = ref(db, "orders");
 
-        // تحميل الطلبات للزوار مباشرة
+        let isAdmin = false;
+        let editID = null;
+
+        // تحميل الطلبات
         onValue(ordersRef, snapshot => {
             let data = snapshot.val();
             let html = "";
@@ -176,57 +179,102 @@
                         <p>السعر: ${o.price}</p>
                         <p>الدليفري: ${o.delivery}</p>
                         <img src="${o.image}" class="order-img">
+
+                        ${isAdmin ? `
+                            <button class="btn-blue" onclick="openEdit('${id}', '${o.name}', '${o.price}', '${o.delivery}', '${o.image}')">تعديل</button>
+                            <button class="btn-red" onclick="deleteOrder('${id}')">حذف</button>
+                        ` : ""}
                     </div>
                 `;
             }
             document.getElementById("orderList").innerHTML = html;
         });
 
-
         // إضافة طلب
         async function saveOrder() {
-            const name = document.getElementById("orderName").value;
-            const price = document.getElementById("orderPrice").value;
-            const delivery = document.getElementById("orderDelivery").value;
-            const file = document.getElementById("orderImage").files[0];
-
+            const name = orderName.value;
+            const price = orderPrice.value;
+            const delivery = orderDelivery.value;
+            const file = orderImage.files[0];
             if (!name || !price || !delivery || !file) return alert("اكمل البيانات");
 
             const storagePath = sRef(storage, "orders/" + Date.now() + "_" + file.name);
             await uploadBytes(storagePath, file);
             const url = await getDownloadURL(storagePath);
 
-            const newOrder = push(ordersRef);
-            set(newOrder, {
-                name,
-                price,
-                delivery,
-                image: url
-            });
+            const newRef = push(ordersRef);
+            set(newRef, { name, price, delivery, image: url });
 
             closeAddPopup();
         }
 
-        // مشرف
-        const ADMIN_CODE = "12345";
+        // فتح نافذة التعديل
+        function openEdit(id, name, price, delivery, image) {
+            editID = id;
+            editName.value = name;
+            editPrice.value = price;
+            editDelivery.value = delivery;
+            document.getElementById("editPopup").style.display = "flex";
+        }
 
-        function showAdminLogin() { document.getElementById("adminLogin").style.display = "flex"; }
-        function closeAdminLogin() { document.getElementById("adminLogin").style.display = "none"; }
+        async function saveEdit() {
+            const name = editName.value;
+            const price = editPrice.value;
+            const delivery = editDelivery.value;
+            let imageUrl = null;
+            const newImage = editImage.files[0];
+
+            if (newImage) {
+                const storagePath = sRef(storage, "orders/" + Date.now());
+                await uploadBytes(storagePath, newImage);
+                imageUrl = await getDownloadURL(storagePath);
+            }
+
+            const updateData = {
+                name,
+                price,
+                delivery
+            };
+
+            if (imageUrl) updateData.image = imageUrl;
+
+            update(ref(db, "orders/" + editID), updateData);
+
+            closeEditPopup();
+        }
+
+        // حذف
+        function deleteOrder(id) {
+            if (confirm("هل أنت متأكد من الحذف؟")) {
+                remove(ref(db, "orders/" + id));
+            }
+        }
+
+        // مشرف
+        const ADMIN_CODE = "010100";
+
+        function showAdminLogin() { adminLogin.style.display = "flex"; }
+        function closeAdminLogin() { adminLogin.style.display = "none"; }
 
         function checkAdmin() {
-            let code = document.getElementById("adminCodeInput").value;
-            if (code === ADMIN_CODE) {
-                document.getElementById("adminPanel").style.display = "block";
-                closeAdminLogin();
+            if (adminCodeInput.value === ADMIN_CODE) {
+                isAdmin = true;
+                adminPanel.style.display = "block";
+                adminLogin.style.display = "none";
+                onValue(ordersRef, () => {}); 
             } else alert("الكود غير صحيح");
         }
 
         function adminLogout() {
-            document.getElementById("adminPanel").style.display = "none";
+            isAdmin = false;
+            adminPanel.style.display = "none";
+            onValue(ordersRef, () => {});
         }
 
-        function openAddPopup() { document.getElementById("addPopup").style.display = "flex"; }
-        function closeAddPopup() { document.getElementById("addPopup").style.display = "none"; }
+        function openAddPopup() { addPopup.style.display = "flex"; }
+        function closeAddPopup() { addPopup.style.display = "none"; }
+        function closeEditPopup() { editPopup.style.display = "none"; }
+
     </script>
 
 </body>
