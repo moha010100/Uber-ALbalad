@@ -108,7 +108,6 @@
   <header class="topbar">
     <div class="brand">
       <div class="logo-circle" title="Uber Albalad">
-        <!-- لوجو دائري بسيط: تقدر تبدله بصورة فعلية لاحقاً -->
         <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='34' height='34'><rect rx='8' width='34' height='34' fill='%23ffffff'/><text x='50%' y='55%' font-size='18' text-anchor='middle' fill='%23ff6a00' font-family='Tahoma' font-weight='700'>UA</text></svg>" alt="logo">
       </div>
       <div class="brand-title">Uber Albalad</div>
@@ -121,22 +120,23 @@
   </header>
 
   <main class="wrap">
-    <!-- ORDERS -->
-    <section class="panel">
-      <h2 style="margin:0 0 12px 0">قائمة الطلبات</h2>
-      <div id="ordersList" class="orders-list">
-        <!-- الكروت تظهر هنا -->
-        <p style="color:#777">جاري التحميل...</p>
-      </div>
-    </section>
 
-    <!-- ADMIN PANEL -->
+    <!-- ADMIN PANEL (مرفوع فوق الطلبات) -->
     <aside class="panel admin-panel" id="adminPanel" style="display:none">
       <h3 style="margin-top:0">لوحة المشرف</h3>
       <button class="btn btn-red small" id="addBtn">إضافة طلب</button>
       <div style="height:12px"></div>
       <button class="btn small" id="logoutBtnPanel" style="background:#f3f3f3;color:#111">تسجيل خروج</button>
     </aside>
+
+    <!-- ORDERS -->
+    <section class="panel">
+      <h2 style="margin:0 0 12px 0">قائمة الطلبات</h2>
+      <div id="ordersList" class="orders-list">
+        <p style="color:#777">جاري التحميل...</p>
+      </div>
+    </section>
+
   </main>
 
   <!-- MODAL ADD -->
@@ -163,7 +163,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  /* --------- CONFIG (لا تغيره إلا لو عندك إعداد آخر) ---------- */
   const firebaseConfig = {
     apiKey: "AIzaSyAbMI7WprkW6WQeXp_XFToSELGnKu49OfQ",
     authDomain: "uber-albalad.firebaseapp.com",
@@ -177,10 +176,8 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  /* --------- IMGBB KEY (اللي وفرتّه) ---------- */
   const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";
 
-  /* --------- عناصر DOM ---------- */
   const adminBtn = document.getElementById("adminBtn");
   const logoutBtn = document.getElementById("logoutBtn");
   const adminPanel = document.getElementById("adminPanel");
@@ -198,33 +195,23 @@
 
   let isAdmin = false;
 
-  /* --------- Utilities: show/hide modal -------- */
   function openAddModal(){
     addModal.classList.add("show");
-    addModal.setAttribute("aria-hidden","false");
   }
   function closeAddModal(){
     addModal.classList.remove("show");
-    addModal.setAttribute("aria-hidden","true");
-    // clear fields
     itemName.value = "";
     itemDelivery.value = "";
     itemImage.value = "";
   }
-  // export so inline handlers or other scripts can call if needed
-  window.openAddModal = openAddModal;
-  window.closeAddModal = closeAddModal;
 
-  /* --------- Admin login / logout ---------- */
   adminBtn.addEventListener("click", () => {
     const code = prompt("ادخل كود المشرف:");
-    if (code === "010100") {
+    if (code === "010500") {   // ← ← ← تم تغيير الكود هنا
       isAdmin = true;
       adminPanel.style.display = "block";
       logoutBtn.style.display = "inline-block";
-      // sync the small panel logout too
       logoutBtnPanel.style.display = "inline-block";
-      // refresh UI
       renderOrders(currentOrders);
       alert("تم تسجيل دخول المشرف");
     } else {
@@ -232,7 +219,6 @@
     }
   });
 
-  // both logout buttons do same action
   function doLogout(){
     isAdmin = false;
     adminPanel.style.display = "none";
@@ -244,7 +230,6 @@
   logoutBtn.addEventListener("click", doLogout);
   logoutBtnPanel.addEventListener("click", doLogout);
 
-  /* --------- Upload to ImgBB ---------- */
   async function uploadToImgBB(file){
     const form = new FormData();
     form.append("image", file);
@@ -253,11 +238,9 @@
       body: form
     });
     const data = await res.json();
-    if(!data || !data.data || !data.data.url) throw new Error("Upload failed");
     return data.data.url;
   }
 
-  /* --------- Save order (add) ---------- */
   saveBtn.addEventListener("click", async () => {
     const name = itemName.value.trim();
     const delivery = itemDelivery.value.trim();
@@ -273,15 +256,12 @@
 
     try {
       const imageURL = await uploadToImgBB(file);
-
       await push(ref(db, "orders"), {
         name, delivery, image: imageURL, createdAt: Date.now()
       });
-
       closeAddModal();
     } catch(e){
-      console.error(e);
-      alert("حصل خطأ أثناء رفع الصورة. جرّب ثانية.");
+      alert("حصل خطأ أثناء رفع الصورة");
     } finally {
       saveBtn.disabled = false;
       saveBtn.textContent = "حفظ";
@@ -290,26 +270,21 @@
 
   cancelBtn.addEventListener("click", () => closeAddModal());
   addBtn.addEventListener("click", () => {
-    // only admin can add - show modal only if admin logged in
-    if(!isAdmin){ alert("لا يمكن إضافة طلب — سجّل دخول المشرف أولاً"); return; }
+    if(!isAdmin){ alert("سجّل دخول المشرف أولاً"); return; }
     openAddModal();
   });
 
-  /* --------- Render orders (client-side, reactive) ---------- */
-  let currentOrders = {}; // local cache
+  let currentOrders = {};
 
   function renderOrders(data){
     currentOrders = data || {};
     ordersList.innerHTML = "";
-    const entries = Object.entries(currentOrders || {}).sort((a,b)=> {
-      // newest first
-      const ta = a[1].createdAt || 0;
-      const tb = b[1].createdAt || 0;
-      return tb - ta;
-    });
+
+    const entries = Object.entries(currentOrders)
+      .sort((a,b)=> (b[1].createdAt||0) - (a[1].createdAt||0));
 
     if(entries.length === 0){
-      ordersList.innerHTML = `<p style="color:#777;margin:8px 0">لا توجد طلبات حالياً</p>`;
+      ordersList.innerHTML = `<p style="color:#777">لا توجد طلبات حالياً</p>`;
       return;
     }
 
@@ -317,58 +292,35 @@
       const card = document.createElement("article");
       card.className = "order-card";
 
-      // create inner HTML safely (we control item data)
       card.innerHTML = `
-        <img class="order-media order-img" src="${item.image || ''}" alt="${escapeHtml(item.name)}">
+        <img class="order-media order-img" src="${item.image}">
         <div class="order-body">
-          <div class="order-title">${escapeHtml(item.name)}</div>
-          <div class="order-delivery">الديلفري: ${escapeHtml(item.delivery)}</div>
+          <div class="order-title">${item.name}</div>
+          <div class="order-delivery">الديلفري: ${item.delivery}</div>
           <div class="order-actions">
-            ${isAdmin ? `<button class="btn btn-red" data-id="${id}" aria-label="حذف الطلب">حذف</button>` : ''}
+            ${isAdmin ? `<button class="btn btn-red" data-id="${id}">حذف</button>` : ''}
           </div>
         </div>
       `;
 
       ordersList.appendChild(card);
 
-      // attach delete handler if admin
       if(isAdmin){
         const delBtn = card.querySelector("button[data-id]");
-        if(delBtn) delBtn.addEventListener("click", async () => {
-          if(!confirm("هل ترغب في حذف هذا الطلب؟")) return;
-          try {
-            await remove(ref(db, "orders/" + delBtn.dataset.id));
-          } catch(e){
-            console.error(e);
-            alert("حصل خطأ أثناء الحذف");
+        delBtn.addEventListener("click", async () => {
+          if(confirm("هل ترغب في حذف هذا الطلب؟")){
+            await remove(ref(db, "orders/" + id));
           }
         });
       }
     }
   }
 
-  /* helper */
-  function escapeHtml(str){
-    if(!str) return "";
-    return String(str)
-      .replaceAll("&","&amp;")
-      .replaceAll("<","&lt;")
-      .replaceAll(">","&gt;")
-      .replaceAll('"',"&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  /* --------- Live sync from Firebase ---------- */
   onValue(ref(db, "orders"), snapshot => {
-    const data = snapshot.val() || {};
-    renderOrders(data);
+    renderOrders(snapshot.val() || {});
   });
 
-  /* expose some functions for debugging or external use */
-  window.openAddModal = openAddModal;
-  window.closeAddModal = closeAddModal;
-  window.doLogout = doLogout;
-
 </script>
+
 </body>
 </html>
