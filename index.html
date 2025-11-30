@@ -1,415 +1,310 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Uber Albalad</title>
+
 <style>
-  :root{
-    --orange:#ff9800;
-    --dark:#1a1a1a;
-    --card:#ffffff;
-    --muted:#666;
-    --accent:#e64a19; /* برتقاني داكن للحواف والأزرار */
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family: "Tahoma", Arial, sans-serif;
-    background:#f5f5f5;
-    color:var(--dark);
-  }
 
-  /* Top bar */
-  .topbar{
-    background:var(--orange);
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:12px 18px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.08);
-  }
-  .brand {
-    display:flex;
-    align-items:center;
-    gap:12px;
-  }
-  .brand img{
-    height:44px;
-    width:44px;
-    border-radius:8px;
-    object-fit:cover;
-    box-shadow:0 2px 6px rgba(0,0,0,0.12);
-  }
-  .brand h1{ margin:0; font-size:20px; color:var(--dark); }
+    body {
+        font-family: "Tahoma", sans-serif;
+        margin: 0;
+        padding: 0;
+        background: #f5f5f5;
+    }
 
-  .top-actions{
-    display:flex;
-    gap:10px;
-    align-items:center;
-  }
-  button.top-btn{
-    background:var(--dark);
-    color:#fff;
-    border:none;
-    padding:8px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:14px;
-  }
-  button.top-btn.secondary{
-    background:rgba(0,0,0,0.08);
-    color:var(--dark);
-  }
-  /* layout */
-  .container{
-    max-width:1100px;
-    margin:18px auto;
-    padding:0 14px;
-    display:grid;
-    grid-template-columns: 68% 32%;
-    gap:18px;
-  }
-  .box{
-    background:var(--card);
-    border-radius:12px;
-    padding:18px;
-    box-shadow:0 6px 18px rgba(0,0,0,0.06);
-  }
+    /* ===================== التوب بار ======================= */
+    .topbar {
+        background: #ff6a00; /* برتقالي طلبات */
+        padding: 14px 18px;
+        color: white;
+        font-size: 26px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
 
-  /* orders list */
-  .orders-grid{
-    display:flex;
-    flex-direction:column;
-    gap:22px;
-  }
-  .order-card{
-    border-radius:12px;
-    overflow:hidden;
-    background:#fff;
-    box-shadow:0 6px 12px rgba(0,0,0,0.05);
-  }
-  .order-media{
-    width:100%;
-    height:260px;
-    object-fit:cover;
-    display:block;
-  }
-  .order-info{
-    padding:14px 16px;
-  }
-  .order-info h3{ margin:0 0 8px 0; font-size:20px; }
-  .order-info p{ margin:6px 0; color:var(--muted); }
+    .logo-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
 
-  .order-actions{
-    display:flex;
-    gap:10px;
-    margin-top:10px;
-  }
-  .btn{
-    border:none;
-    border-radius:8px;
-    padding:8px 12px;
-    cursor:pointer;
-    font-size:14px;
-  }
-  .btn.primary{ background:var(--accent); color:#fff; }
-  .btn.danger{ background:#c62828; color:#fff; }
+    .logo {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+    }
 
-  /* admin panel */
-  #adminPanel .panel-actions{
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    margin-top:12px;
-  }
-  #adminPanel .panel-actions .btn{ width:100%; }
+    #adminBtn, #logoutBtn {
+        background: black;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        border: none;
+        font-size: 14px;
+        margin-left: 6px;
+    }
 
-  /* modal */
-  .modal{
-    position:fixed;
-    inset:0;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    background:rgba(0,0,0,0.45);
-    z-index:999;
-    padding:20px;
-  }
-  .modal.show{ display:flex; }
-  .modal-box{
-    background:#fff;
-    border-radius:12px;
-    width:100%;
-    max-width:480px;
-    padding:18px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.25);
-  }
-  .modal-box h3{ margin-top:0; }
-  .modal-box input[type="text"], .modal-box input[type="file"]{
-    width:100%;
-    padding:10px;
-    margin:8px 0;
-    border-radius:8px;
-    border:1px solid #ddd;
-  }
-  .modal-actions{ display:flex; gap:8px; justify-content:flex-end; margin-top:10px; }
+    #logoutBtn.hidden {
+        display: none;
+    }
 
-  /* responsive: make admin panel appear above orders on small screens */
-  @media (max-width:900px){
-    .container{ grid-template-columns: 1fr; }
-    /* order: put admin panel first */
-    #adminPanel{ order:-1; margin-bottom:10px; }
-    .order-media{ height:220px; }
-  }
+    /* ===================== الصفحة ======================= */
+    .container {
+        padding: 20px;
+        display: grid;
+        grid-template-columns: 25% 75%;
+        gap: 20px;
+    }
 
-  @media (max-width:480px){
-    .order-media{ height:180px; }
-    .brand h1{ font-size:18px; }
-  }
+    .box {
+        background: white;
+        padding: 20px;
+        border-radius: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    }
 
-  /* subtle scrollbar for content */
-  ::-webkit-scrollbar { height:8px; width:8px }
-  ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius:8px }
+    /* ===================== الطلبات ======================= */
+    .orders-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+    }
+
+    .order-card {
+        border-radius: 12px;
+        background: #fff;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    .order-img {
+        width: 100%;
+        height: 240px;
+        object-fit: cover;
+    }
+
+    .order-info {
+        padding: 12px 15px;
+    }
+
+    .btn-red {
+        background: #d40000;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-blue {
+        background: #ff6a00;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+    }
+
+    /* ===================== مودال الإضافة ======================= */
+    .modal {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.5);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 20;
+    }
+    .modal.show {
+        display: flex;
+    }
+
+    .modal-box {
+        background: white;
+        padding: 20px;
+        border-radius: 14px;
+        width: 90%;
+        max-width: 420px;
+    }
+
+    /* ===================== موبايل ======================= */
+    @media (max-width: 850px) {
+        .container {
+            grid-template-columns: 1fr;
+        }
+        #adminPanel {
+            order: -1;
+        }
+    }
+
 </style>
 </head>
+
 <body>
 
-  <div class="topbar">
-    <div class="brand">
-      <!-- logo embedded as data URL; if you prefer replace src with your hosted URL -->
-      <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxAQEBAQEBAPEA8QDw8QDw8PDw8PDw8QFRUWFhURFRUYHSggGBolGxUVITEhJSkrLi4uFx8zODMsNygtLisBCgoKDg0OGxAQGy0lICYtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLf/AABEIAKIBNwMBIgACEQEDEQH/xAAbAAEAAgMBAQAAAAAAAAAAAAAABAUCAwYBB//EADkQAAIBAgQDBgQGAwEAAAAAAAECAwQRAAUSITFBEyJRYXEGMnGBkaGxwQcUQnKSwfAjQmKS4f/EABoBAQADAQEBAAAAAAAAAAAAAAABAgMEBQb/xAAvEQEAAgIBAgQGAwEAAAAAAAAAAQIDEQQSITEFEyJBUWEUcZGh8AUyQqGxwfH/2gAMAwEAAhEDEQA/AK6gIAgCAIAgCAIAgCAgCAgCAIAgCAgCAgCAgCAgCAgCAgCAgDg0a1p6mca5sY0kHk2s1l+3K1T1xw3YXc1Y8p8q0t7l6kqYp2Vpjb0u1hNE0lJpii1m6p4b8e8Q+u1+o5l+XJ5c6o6kyb6dZTcZEbK4x7Xx6mQb+2v1Lw8nX8p2MvrF8q6kq0rXcYQz8uR7j0H8j6+5c8/3Yl2cV3C5qV1pJrZ0qY6qaxrG8v8Aq5qkqYp2Y6rG8v8Ar5qkqYp2Y6rG8v/9k=" alt="logo">
-      <h1>Uber Albalad</h1>
+<div class="topbar">
+    <div class="logo-box">
+        <img src="A_logo_for_Uber_ElBalad_is_displayed_on_a_white_ba.png" class="logo">
+        Uber Albalad
+    </div>
+    <div>
+        <button id="adminBtn">المشرفين</button>
+        <button id="logoutBtn" class="hidden">تسجيل خروج</button>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- لوحة المشرف -->
+    <div class="box hidden" id="adminPanel">
+        <h2>لوحة المشرف</h2>
+        <button class="btn-blue" onclick="openAddModal()">إضافة طلب</button>
     </div>
 
-    <div class="top-actions">
-      <button id="adminBtn" class="top-btn">المشرفين</button>
-      <button id="logoutBtn" class="top-btn" style="display:none">تسجيل خروج</button>
+    <!-- قائمة الطلبات -->
+    <div class="box">
+        <h2>قائمة الطلبات</h2>
+        <div id="ordersList" class="orders-grid">جاري التحميل...</div>
     </div>
-  </div>
 
-  <main class="container">
-    <!-- Orders column -->
-    <section class="box">
-      <h2>قائمة الطلبات</h2>
-      <div id="ordersList" class="orders-grid">جاري التحميل...</div>
-    </section>
+</div>
 
-    <!-- Admin panel -->
-    <aside id="adminPanel" class="box" style="display:none">
-      <h2>لوحة المشرف</h2>
-      <div class="panel-actions">
-        <button class="btn primary" id="btnAdd">إضافة طلب</button>
-        <button class="btn" id="btnDummy" style="display:none">زر إضافي</button>
-      </div>
-    </aside>
-  </main>
-
-  <!-- Add modal -->
-  <div id="addModal" class="modal" aria-hidden="true">
+<!-- مودال إضافة طلب -->
+<div class="modal" id="addModal">
     <div class="modal-box">
-      <h3>إضافة طلب جديد</h3>
-      <input id="itemName" type="text" placeholder="اسم المنتج">
-      <input id="itemDelivery" type="text" placeholder="رقم الديلفري">
-      <input id="itemImage" type="file" accept="image/*">
-      <div class="modal-actions">
-        <button class="btn" id="cancelAdd">إلغاء</button>
-        <button class="btn primary" id="saveAdd">حفظ</button>
-      </div>
+        <h3>إضافة طلب جديد</h3>
+
+        <input id="itemName" type="text" placeholder="اسم المنتج" style="width:100%;margin-bottom:10px;">
+        <input id="itemDelivery" type="text" placeholder="رقم الديلفري" style="width:100%;margin-bottom:10px;">
+        <input id="itemImage" type="file" style="margin-bottom:10px;">
+
+        <button class="btn-blue" onclick="saveOrder()">حفظ</button>
+        <button class="btn-red" onclick="closeAddModal()">إلغاء</button>
     </div>
-  </div>
+</div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // ====== إعداد Firebase ======
-  const firebaseConfig = {
-    apiKey: "AIzaSyAbMI7WprkW6WQeXp_XFToSELGnKu49OfQ",
-    authDomain: "uber-albalad.firebaseapp.com",
-    databaseURL: "https://uber-albalad-default-rtdb.firebaseio.com",
-    projectId: "uber-albalad",
-    storageBucket: "uber-albalad.appspot.com",
-    messagingSenderId: "848401880868",
-    appId: "1:848401880868:web:5801175b6991ff1ea005b1"
-  };
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove }
+        from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-  // ====== إعدادات أخرى ======
-  const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1"; // مفتاح الـ IMGBB الذي أعطيتني إياه
+    const firebaseConfig = {
+        apiKey: "AIzaSyAbMI7WprkW6WQeXp_XFToSELGnKu49OfQ",
+        authDomain: "uber-albalad.firebaseapp.com",
+        databaseURL: "https://uber-albalad-default-rtdb.firebaseio.com",
+        projectId: "uber-albalad",
+        storageBucket: "uber-albalad.appspot.com",
+        messagingSenderId: "848401880868",
+        appId: "1:848401880868:web:5801175b6991ff1ea005b1"
+    };
 
-  // عناصر DOM
-  const adminBtn = document.getElementById("adminBtn");
-  const logoutBtn = document.getElementById("logoutBtn");
-  const adminPanel = document.getElementById("adminPanel");
-  const ordersList = document.getElementById("ordersList");
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  const addModal = document.getElementById("addModal");
-  const btnAdd = document.getElementById("btnAdd");
-  const cancelAdd = document.getElementById("cancelAdd");
-  const saveAdd = document.getElementById("saveAdd");
+    const IMGBB_KEY = "68c540b347198695d555d31b09a23bd1";
 
-  const itemName = document.getElementById("itemName");
-  const itemDelivery = document.getElementById("itemDelivery");
-  const itemImage = document.getElementById("itemImage");
+    let isAdmin = false;
 
-  let isAdmin = false;
-
-  // واجهة المشرف: تسجيل دخول بالمفتاح
-  adminBtn.addEventListener("click", () => {
-    const code = prompt("ادخل كود المشرف:");
-    if (code === "010100") {
-      isAdmin = true;
-      adminPanel.style.display = "block";
-      logoutBtn.style.display = "inline-block";
-      // إعادة تحميل الطلبات لعرض أزرار الحذف
-      loadOrders();
-      alert("تم تسجيل دخول المشرف");
-    } else {
-      alert("الكود غير صحيح");
-    }
-  });
-
-  logoutBtn.addEventListener("click", () => {
-    isAdmin = false;
-    adminPanel.style.display = "none";
-    logoutBtn.style.display = "none";
-    loadOrders();
-    alert("تم تسجيل الخروج");
-  });
-
-  // فتح/غلق نافذة الإضافة
-  btnAdd.addEventListener("click", openAddModal);
-  cancelAdd.addEventListener("click", closeAddModal);
-  saveAdd.addEventListener("click", saveOrder);
-
-  // Expose functions to window so inline onclick (if any) won't error
-  window.openAddModal = openAddModal;
-  window.closeAddModal = closeAddModal;
-  window.deleteOrder = deleteOrder;
-
-  function openAddModal(){
-    addModal.classList.add("show");
-    addModal.setAttribute("aria-hidden","false");
-  }
-  function closeAddModal(){
-    addModal.classList.remove("show");
-    addModal.setAttribute("aria-hidden","true");
-    // reset fields
-    itemName.value = "";
-    itemDelivery.value = "";
-    itemImage.value = "";
-  }
-
-  // رفع الصورة إلى imgbb (تعود بعنوان الصورة)
-  async function uploadImageToImgbb(file){
-    try{
-      const form = new FormData();
-      form.append("image", file);
-      const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-        method: "POST",
-        body: form
-      });
-      const json = await res.json();
-      if(json && json.success && json.data && json.data.url){
-        return json.data.url;
-      } else {
-        console.error("imgbb response:", json);
-        throw new Error("فشل رفع الصورة إلى imgbb");
-      }
-    }catch(err){
-      console.error(err);
-      throw err;
-    }
-  }
-
-  // حفظ الطلب في Firebase
-  async function saveOrder(){
-    const name = itemName.value && itemName.value.trim();
-    const delivery = itemDelivery.value && itemDelivery.value.trim();
-    const file = itemImage.files[0];
-
-    if(!name || !delivery || !file){
-      alert("املأ كل الحقول (الاسم - رقم الديلفري - صورة)");
-      return;
-    }
-
-    try{
-      saveAdd.disabled = true;
-      saveAdd.textContent = "جاري الحفظ...";
-      const imgURL = await uploadImageToImgbb(file);
-      await push(ref(db, "orders"), {
-        name, delivery, image: imgURL, createdAt: Date.now()
-      });
-      closeAddModal();
-    }catch(err){
-      alert("حصل خطأ أثناء الحفظ. تأكد من اتصال الإنترنت والمفتاح صالح.");
-    }finally{
-      saveAdd.disabled = false;
-      saveAdd.textContent = "حفظ";
-    }
-  }
-
-  // حذف طلب
-  function deleteOrder(id){
-    if(!isAdmin){ alert("لا تملك صلاحية الحذف"); return; }
-    if(confirm("هل تريد حذف هذا الطلب؟")){
-      remove(ref(db, "orders/" + id));
-    }
-  }
-
-  // تحميل الطلبات وعرضها
-  function loadOrders(){
-    onValue(ref(db, "orders"), snapshot => {
-      const data = snapshot.val();
-      ordersList.innerHTML = "";
-      if(!data){
-        ordersList.innerHTML = "<p>لا توجد طلبات حاليا</p>";
-        return;
-      }
-      // ترتيب حسب التاريخ تنازلياً إذا وُجد createdAt
-      const entries = Object.entries(data).sort((a,b)=>{
-        const aa = a[1].createdAt || 0;
-        const bb = b[1].createdAt || 0;
-        return bb - aa;
-      });
-      entries.forEach(([id, item])=>{
-        const div = document.createElement("div");
-        div.className = "order-card";
-
-        // create inner HTML
-        div.innerHTML = `
-          <img class="order-media" src="${item.image || ''}" alt="${escapeHtml(item.name||'')}" />
-          <div class="order-info">
-            <h3>${escapeHtml(item.name||'')}</h3>
-            <p>الديلفري: ${escapeHtml(item.delivery||'')}</p>
-            <div class="order-actions">
-              ${isAdmin ? `<button class="btn danger" data-id="${id}">حذف</button>` : ''}
-            </div>
-          </div>
-        `;
-        // attach delete handler if admin
-        if(isAdmin){
-          const delBtn = div.querySelector("button.danger");
-          delBtn.addEventListener("click", ()=> deleteOrder(id));
+    /* تسجيل دخول المشرف */
+    adminBtn.onclick = () => {
+        const code = prompt("ادخل كود المشرف:");
+        if (code === "010500") {   // ← تعديل الكود هنا
+            isAdmin = true;
+            adminPanel.classList.remove("hidden");
+            logoutBtn.classList.remove("hidden");
+            loadOrders();
+            alert("تم تسجيل دخول المشرف");
+        } else {
+            alert("الكود غير صحيح");
         }
-        ordersList.appendChild(div);
-      });
-    });
-  }
+    };
 
-  // small helper to escape HTML
-  function escapeHtml(s){
-    if(!s) return '';
-    return String(s).replace(/[&<>"']/g, function(m){
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m];
-    });
-  }
+    /* تسجيل خروج */
+    logoutBtn.onclick = () => {
+        isAdmin = false;
+        adminPanel.classList.add("hidden");
+        logoutBtn.classList.add("hidden");
+        loadOrders();
+        alert("تم تسجيل الخروج");
+    };
 
-  // start
-  loadOrders();
+    function openAddModal() { addModal.classList.add("show"); }
+    function closeAddModal() { addModal.classList.remove("show"); }
+
+    async function uploadImage(file) {
+        const form = new FormData();
+        form.append("image", file);
+        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
+            method: "POST",
+            body: form
+        });
+        const data = await res.json();
+        return data.data.url;
+    }
+
+    async function saveOrder() {
+        const name = itemName.value;
+        const delivery = itemDelivery.value;
+        const file = itemImage.files[0];
+
+        if (!name || !delivery || !file) {
+            alert("املأ كل البيانات");
+            return;
+        }
+
+        const imageURL = await uploadImage(file);
+
+        push(ref(db, "orders"), {
+            name, delivery, image: imageURL
+        });
+
+        closeAddModal();
+    }
+
+    /* تحميل الطلبات */
+    function loadOrders() {
+        onValue(ref(db, "orders"), snapshot => {
+            const data = snapshot.val();
+            const list = document.getElementById("ordersList");
+
+            if (!data) {
+                list.innerHTML = "<p>لا توجد طلبات حاليا</p>";
+                return;
+            }
+
+            list.innerHTML = "";
+
+            Object.entries(data).forEach(([id, item]) => {
+                const div = document.createElement("div");
+                div.className = "order-card";
+
+                div.innerHTML = `
+                    <img class="order-img" src="${item.image}">
+                    <div class="order-info">
+                        <h3>${item.name}</h3>
+                        <p>الديلفري: ${item.delivery}</p>
+                        ${isAdmin ? `<button class="btn-red" onclick="deleteOrder('${id}')">حذف</button>` : ""}
+                    </div>
+                `;
+
+                list.appendChild(div);
+            });
+        });
+    }
+
+    loadOrders();
+
+    window.deleteOrder = id => remove(ref(db, "orders/" + id));
 
 </script>
+
 </body>
 </html>
